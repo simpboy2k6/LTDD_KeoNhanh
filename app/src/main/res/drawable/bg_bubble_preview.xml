@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Bong bóng xem trước trong thẻ "Chat phòng chờ" (đặt trên nền trắng nên dùng nền xanh nhạt) -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+    <solid android:color="@color/kn_bg" />
+    <corners android:radius="@dimen/radius_button" />
+</shape>

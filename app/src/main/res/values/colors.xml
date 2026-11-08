@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Bảng màu KèoNhanh (mục 4 tài liệu tuần 2). Layout KHÔNG dùng mã HEX trực tiếp:
+  ưu tiên ?attr/colorPrimary, ?attr/colorOnSurface... trong theme; chỉ dùng @color/... khi theme không có vai trò tương ứng.
+  Người giữ file: TV3. Ai cần thêm màu thì ghi vào pull request.
+-->
+<resources>
+    <!-- Thương hiệu -->
+    <color name="kn_green">#FF12A46F</color>          <!-- nút chính, môn bóng đá; chữ trắng trên nền này chỉ dùng cho chữ to/đậm -->
+    <color name="kn_green_text">#FF0E7E55</color>     <!-- chữ xanh cỡ nhỏ: 5,1:1 trên trắng -->
+    <color name="kn_green_dark">#FF0B3A2C</color>     <!-- thẻ đếm ngược -->
+    <color name="kn_green_tint">#FFE3F4EB</color>     <!-- nền badge uy tín, primaryContainer -->
+
+    <!-- Nền và chữ -->
+    <color name="kn_bg">#FFEDF6F1</color>
+    <color name="kn_surface">#FFFFFFFF</color>
+    <color name="kn_ink">#FF16231E</color>
+    <color name="kn_ink_muted">#FF5E6E68</color>
+    <color name="kn_outline">#FFD5E2DC</color>
+    <color name="kn_on_dark_muted">#FFCFE0D8</color>  <!-- chữ phụ trên nền xanh đậm: 9,2:1 -->
+    <color name="kn_on_dark_track">#FF2E5A4B</color>  <!-- rãnh thanh tiến độ trên nền xanh đậm -->
+
+    <!-- Màu theo môn + nền nhạt + chữ trên nền nhạt (đều đạt 4,5:1) -->
+    <color name="kn_orange">#FFE8590C</color>         <!-- môn cầu lông -->
+    <color name="kn_orange_light">#FFF08A4B</color>   <!-- số đếm ngược trên nền xanh đậm: 5,1:1 -->
+    <color name="kn_orange_tint">#FFFDEBDF</color>
+    <color name="kn_orange_text">#FFB04308</color>
+    <color name="kn_purple">#FF7B5CF0</color>         <!-- môn board game -->
+    <color name="kn_purple_tint">#FFEEEAFE</color>
+    <color name="kn_purple_text">#FF5B3FD6</color>
+    <color name="kn_blue">#FF2F6FE4</color>           <!-- vị trí người dùng, GPS -->
+    <color name="kn_error">#FFB3261E</color>
+    <color name="white">#FFFFFFFF</color>
+
+    <!-- 6 màu nền avatar chữ cái đầu (chữ trắng đạt 4,5:1 trên cả 6 màu) -->
+    <color name="kn_avatar_1">#FF2F6FE4</color>
+    <color name="kn_avatar_2">#FF7B5CF0</color>
+    <color name="kn_avatar_3">#FFBE490A</color>
+    <color name="kn_avatar_4">#FF0E7E55</color>
+    <color name="kn_avatar_5">#FF0B3A2C</color>
+    <color name="kn_avatar_6">#FFC2375F</color>
+
+    <!-- Vòng bán kính check-in trên bản đồ S13 (xanh 14% độ đậm) -->
+    <color name="kn_green_veil">#2412A46F</color>
+
+    <!-- Chỉ dùng cho ảnh bản đồ giữ chỗ (drawable/img_map_placeholder.xml) -->
+    <color name="kn_map_land">#FFE6EEE9</color>
+    <color name="kn_map_park">#FFCDE8D6</color>
+    <color name="kn_map_water">#FFBFDCEB</color>
+</resources>

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Chuỗi của TV2: Khám phá (S09, S10), Bộ lọc (S11), Tạo kèo (S12) -->
+<resources>
+    <!-- S09, S10 Khám phá -->
+    <string name="explore_search_hint">Tìm kèo quanh bạn</string>
+    <string name="explore_radius_chip">%1$d km</string>
+    <string name="explore_show_list">Danh sách</string>
+    <string name="explore_show_map">Bản đồ</string>
+    <string name="explore_create">Tạo kèo</string>
+    <string name="explore_view_keo">Xem kèo</string>
+    <string name="explore_empty_title">Chưa có kèo quanh bạn</string>
+    <string name="explore_empty_message">Thử tăng bán kính hoặc tự tạo một kèo</string>
+    <string name="cd_map_placeholder">Bản đồ minh họa các kèo quanh bạn</string>
+    <string name="cd_open_filter">Mở bộ lọc</string>
+    <string name="cd_scan_invite">Quét mã mời vào kèo</string>
+
+    <!-- S11 Bộ lọc -->
+    <string name="filter_title">Bộ lọc</string>
+    <string name="filter_sport">Môn</string>
+    <string name="filter_radius">Bán kính</string>
+    <string name="filter_radius_value">%1$d km</string>
+    <string name="filter_reset">Đặt lại</string>
+    <string name="filter_apply">Áp dụng</string>
+
+    <!-- S12 Tạo kèo -->
+    <string name="create_title">Tạo kèo</string>
+    <string name="create_sport">Môn</string>
+    <string name="create_name_hint">Tên kèo</string>
+    <string name="create_name_helper">Ví dụ: Đá bóng 7 người</string>
+    <string name="create_place_hint">Điểm hẹn</string>
+    <string name="create_place_helper">Chọn trên bản đồ; check-in tính theo khoảng cách tới điểm này</string>
+    <string name="create_players">Số người</string>
+    <string name="create_players_value">%1$d người</string>
+    <string name="create_time_hint">Giờ hẹn</string>
+    <string name="create_deadline_hint">Hạn chốt</string>
+    <string name="create_deadline_helper">Đến hạn chốt thì danh sách được chốt</string>
+    <string name="create_trust_switch">Yêu cầu uy tín tối thiểu</string>
+    <string name="create_trust_helper">Bật ngưỡng thì người chơi phải xin vào và bạn duyệt</string>
+    <string name="create_trust_value">≥ %1$d%%</string>
+    <string name="create_submit">Tạo kèo</string>
+    <string name="cd_pick_place">Chọn trên bản đồ</string>
+    <string name="cd_pick_time">Chọn giờ</string>
+
+    <!-- S13 Chọn điểm hẹn: tọa độ này quyết định check-in theo khoảng cách -->
+    <string name="pick_title">Chọn điểm hẹn</string>
+    <string name="pick_hint">Kéo bản đồ để ghim nằm đúng chỗ hẹn</string>
+    <string name="pick_radius_note">Vòng tròn là vùng check-in %1$d m quanh điểm hẹn</string>
+    <string name="pick_confirm">Dùng vị trí này</string>
+    <string name="cd_my_location">Về vị trí của tôi</string>
+    <string name="cd_map_pick">Bản đồ chọn điểm hẹn</string>
+</resources>

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Lưới 4dp: khoảng cách chỉ dùng các bước dưới đây (mục 4 tài liệu tuần 2) -->
+<resources>
+    <dimen name="space_4">4dp</dimen>
+    <dimen name="space_8">8dp</dimen>
+    <dimen name="space_12">12dp</dimen>
+    <dimen name="space_16">16dp</dimen>
+    <dimen name="space_24">24dp</dimen>
+    <dimen name="space_32">32dp</dimen>
+    <dimen name="space_48">48dp</dimen>
+    <dimen name="avatar_overlap">-8dp</dimen>
+
+    <!-- Bo góc -->
+    <dimen name="radius_input">8dp</dimen>
+    <dimen name="radius_button">16dp</dimen>
+    <dimen name="radius_card">24dp</dimen>
+    <dimen name="radius_sheet">28dp</dimen>
+    <dimen name="radius_pill">100dp</dimen>
+
+    <!-- Kích thước thành phần -->
+    <dimen name="touch_min">48dp</dimen>
+    <dimen name="button_height">56dp</dimen>
+    <dimen name="search_bar_height">56dp</dimen>
+    <dimen name="icon_sm">20dp</dimen>
+    <dimen name="icon_md">24dp</dimen>
+    <dimen name="icon_lg">48dp</dimen>
+    <dimen name="icon_xl">64dp</dimen>
+    <dimen name="avatar_sm">32dp</dimen>
+    <dimen name="avatar_md">48dp</dimen>
+    <dimen name="avatar_lg">80dp</dimen>
+    <dimen name="sport_tile">56dp</dimen>
+    <dimen name="logo_tile">72dp</dimen>
+    <dimen name="qr_size">232dp</dimen>
+    <dimen name="scan_frame">240dp</dimen>
+    <dimen name="progress_height">8dp</dimen>
+    <dimen name="progress_circle">32dp</dimen>
+    <dimen name="progress_circle_track">4dp</dimen>
+    <dimen name="stroke_thin">1dp</dimen>
+    <dimen name="check_badge">18dp</dimen>
+    <dimen name="fab_clearance">96dp</dimen>
+    <dimen name="checkin_radius_preview">160dp</dimen>
+    <dimen name="pin_size">48dp</dimen>
+    <dimen name="pin_offset">-24dp</dimen>
+</resources>

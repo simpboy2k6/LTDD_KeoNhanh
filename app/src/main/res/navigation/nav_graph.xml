@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Luồng màn hình (mục 3 tài liệu tuần 2) dịch sang Navigation component.
+  Người giữ file: TV3. Mở tab Design trong Android Studio để xem sơ đồ.
+  Mã màn hình S01–S19 ghi trong android:label để dễ đối chiếu với Figma.
+-->
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/explore_graph">
+
+    <!-- Màn Đăng nhập mở đè lên Khám phá khi chưa đăng nhập (xem MainActivity) -->
+    <action
+        android:id="@+id/action_global_login"
+        app:destination="@id/loginFragment" />
+
+    <!-- Tab Khám phá: bản đồ và danh sách nằm chung một nhánh để tab vẫn sáng khi chuyển qua lại -->
+    <navigation
+        android:id="@+id/explore_graph"
+        app:startDestination="@id/exploreMapFragment">
+
+        <fragment
+            android:id="@+id/exploreMapFragment"
+            android:name="com.keonhanh.app.ui.explore.ExploreMapFragment"
+            android:label="S09 Khám phá – bản đồ"
+            tools:layout="@layout/fragment_explore_map">
+            <action
+                android:id="@+id/action_exploreMap_to_exploreList"
+                app:destination="@id/exploreListFragment" />
+            <action
+                android:id="@+id/action_exploreMap_to_filter"
+                app:destination="@id/filterBottomSheet" />
+            <action
+                android:id="@+id/action_exploreMap_to_scanQr"
+                app:destination="@id/scanQrFragment" />
+            <action
+                android:id="@+id/action_exploreMap_to_createKeo"
+                app:destination="@id/createKeoFragment" />
+            <action
+                android:id="@+id/action_exploreMap_to_lobby"
+                app:destination="@id/lobbyFragment" />
+        </fragment>
+
+        <fragment
+            android:id="@+id/exploreListFragment"
+            android:name="com.keonhanh.app.ui.explore.ExploreListFragment"
+            android:label="S10 Khám phá – danh sách"
+            tools:layout="@layout/fragment_explore_list">
+            <action
+                android:id="@+id/action_exploreList_to_filter"
+                app:destination="@id/filterBottomSheet" />
+            <action
+                android:id="@+id/action_exploreList_to_scanQr"
+                app:destination="@id/scanQrFragment" />
+            <action
+                android:id="@+id/action_exploreList_to_createKeo"
+                app:destination="@id/createKeoFragment" />
+            <action
+                android:id="@+id/action_exploreList_to_lobby"
+                app:destination="@id/lobbyFragment" />
+        </fragment>
+
+        <dialog
+            android:id="@+id/filterBottomSheet"
+            android:name="com.keonhanh.app.ui.explore.FilterBottomSheet"
+            android:label="S11 Bộ lọc"
+            tools:layout="@layout/bottom_sheet_filter" />
+    </navigation>
+
+    <fragment
+        android:id="@+id/myKeoFragment"
+        android:name="com.keonhanh.app.ui.mykeo.MyKeoFragment"
+        android:label="S17 Kèo của tôi"
+        tools:layout="@layout/fragment_my_keo">
+        <action
+            android:id="@+id/action_myKeo_to_lobby"
+            app:destination="@id/lobbyFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/chatListFragment"
+        android:name="com.keonhanh.app.ui.chat.ChatListFragment"
+        android:label="S18 Danh sách chat"
+        tools:layout="@layout/fragment_chat_list">
+        <action
+            android:id="@+id/action_chatList_to_lobbyChat"
+            app:destination="@id/lobbyChatFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/profileFragment"
+        android:name="com.keonhanh.app.ui.profile.ProfileFragment"
+        android:label="S05 Hồ sơ"
+        tools:layout="@layout/fragment_profile" />
+
+    <fragment
+        android:id="@+id/loginFragment"
+        android:name="com.keonhanh.app.ui.auth.LoginFragment"
+        android:label="S02 Đăng nhập"
+        tools:layout="@layout/fragment_login" />
+
+    <fragment
+        android:id="@+id/createKeoFragment"
+        android:name="com.keonhanh.app.ui.create.CreateKeoFragment"
+        android:label="S12 Tạo kèo"
+        tools:layout="@layout/fragment_create_keo">
+        <action
+            android:id="@+id/action_createKeo_to_pickLocation"
+            app:destination="@id/pickLocationFragment" />
+        <!-- Tạo xong thì thay màn Tạo kèo bằng phòng chờ, Back không quay lại form -->
+        <action
+            android:id="@+id/action_createKeo_to_lobby"
+            app:destination="@id/lobbyFragment"
+            app:popUpTo="@id/createKeoFragment"
+            app:popUpToInclusive="true" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/pickLocationFragment"
+        android:name="com.keonhanh.app.ui.create.PickLocationFragment"
+        android:label="S13 Chọn điểm hẹn"
+        tools:layout="@layout/fragment_pick_location" />
+
+    <fragment
+        android:id="@+id/lobbyFragment"
+        android:name="com.keonhanh.app.ui.lobby.LobbyFragment"
+        android:label="S15 Chi tiết kèo"
+        tools:layout="@layout/fragment_lobby">
+        <argument
+            android:name="keoId"
+            android:defaultValue="k2"
+            app:argType="string" />
+        <action
+            android:id="@+id/action_lobby_to_lobbyChat"
+            app:destination="@id/lobbyChatFragment" />
+        <action
+            android:id="@+id/action_lobby_to_inviteQr"
+            app:destination="@id/inviteQrFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/lobbyChatFragment"
+        android:name="com.keonhanh.app.ui.lobby.LobbyChatFragment"
+        android:label="S16 Chat phòng chờ"
+        tools:layout="@layout/fragment_lobby_chat">
+        <argument
+            android:name="keoId"
+            android:defaultValue="k2"
+            app:argType="string" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/inviteQrFragment"
+        android:name="com.keonhanh.app.ui.checkin.InviteQrFragment"
+        android:label="S06 Mã mời vào kèo"
+        tools:layout="@layout/fragment_invite_qr">
+        <argument
+            android:name="keoId"
+            android:defaultValue="k2"
+            app:argType="string" />
+    </fragment>
+
+    <!-- Quét xong thì thay màn quét bằng phòng chờ của kèo; Back về Khám phá -->
+    <fragment
+        android:id="@+id/scanQrFragment"
+        android:name="com.keonhanh.app.ui.checkin.ScanQrFragment"
+        android:label="S07 Quét mã mời"
+        tools:layout="@layout/fragment_scan_qr">
+        <action
+            android:id="@+id/action_scanQr_to_lobby"
+            app:destination="@id/lobbyFragment"
+            app:popUpTo="@id/scanQrFragment"
+            app:popUpToInclusive="true" />
+    </fragment>
+</navigation>

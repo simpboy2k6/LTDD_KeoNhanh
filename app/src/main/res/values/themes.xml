@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Theme chung của app. Người giữ file: TV3. -->
+<resources>
+
+    <style name="Base.Theme.KeoNhanh" parent="Theme.Material3.Light.NoActionBar">
+        <!-- Vai trò màu Material 3 -> bảng màu KèoNhanh -->
+        <item name="colorPrimary">@color/kn_green</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorPrimaryContainer">@color/kn_green_tint</item>
+        <item name="colorOnPrimaryContainer">@color/kn_green_dark</item>
+        <item name="colorSecondary">@color/kn_green_dark</item>
+        <item name="colorOnSecondary">@color/white</item>
+        <item name="colorSecondaryContainer">@color/kn_green_tint</item>
+        <item name="colorOnSecondaryContainer">@color/kn_green_dark</item>
+        <item name="colorTertiary">@color/kn_orange</item>
+        <item name="colorOnTertiary">@color/white</item>
+        <item name="colorError">@color/kn_error</item>
+        <item name="colorOnError">@color/white</item>
+
+        <item name="android:colorBackground">@color/kn_bg</item>
+        <item name="colorOnBackground">@color/kn_ink</item>
+        <item name="colorSurface">@color/kn_surface</item>
+        <item name="colorOnSurface">@color/kn_ink</item>
+        <item name="colorOnSurfaceVariant">@color/kn_ink_muted</item>
+        <item name="colorOutline">@color/kn_outline</item>
+        <item name="colorOutlineVariant">@color/kn_outline</item>
+        <item name="colorSurfaceContainerLowest">@color/kn_surface</item>
+        <item name="colorSurfaceContainerLow">@color/kn_surface</item>
+        <item name="colorSurfaceContainer">@color/kn_surface</item>
+        <item name="colorSurfaceContainerHigh">@color/kn_surface</item>
+        <item name="colorSurfaceContainerHighest">@color/kn_surface</item>
+
+        <!-- 8 kiểu chữ (values/type.xml) -->
+        <item name="textAppearanceDisplaySmall">@style/TextAppearance.KeoNhanh.DisplaySmall</item>
+        <item name="textAppearanceHeadlineSmall">@style/TextAppearance.KeoNhanh.HeadlineSmall</item>
+        <item name="textAppearanceTitleLarge">@style/TextAppearance.KeoNhanh.TitleLarge</item>
+        <item name="textAppearanceTitleMedium">@style/TextAppearance.KeoNhanh.TitleMedium</item>
+        <item name="textAppearanceBodyLarge">@style/TextAppearance.KeoNhanh.BodyLarge</item>
+        <item name="textAppearanceBodyMedium">@style/TextAppearance.KeoNhanh.BodyMedium</item>
+        <item name="textAppearanceLabelLarge">@style/TextAppearance.KeoNhanh.LabelLarge</item>
+        <item name="textAppearanceLabelMedium">@style/TextAppearance.KeoNhanh.LabelMedium</item>
+
+        <!-- Style mặc định của component (values/styles.xml) -->
+        <item name="materialButtonStyle">@style/Widget.KeoNhanh.Button</item>
+        <item name="materialButtonOutlinedStyle">@style/Widget.KeoNhanh.Button.Outlined</item>
+        <item name="materialCardViewStyle">@style/Widget.KeoNhanh.Card</item>
+        <item name="textInputStyle">@style/Widget.KeoNhanh.TextInputLayout</item>
+        <item name="bottomNavigationStyle">@style/Widget.KeoNhanh.BottomNavigation</item>
+        <item name="toolbarStyle">@style/Widget.KeoNhanh.Toolbar</item>
+    </style>
+
+    <style name="Theme.KeoNhanh" parent="Base.Theme.KeoNhanh" />
+</resources>

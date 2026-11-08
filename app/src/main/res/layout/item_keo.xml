@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Thẻ kèo dùng chung (TV3 giữ): danh sách S10, S17 và thẻ xem trước ở S09.
+  Nội dung gán trong ui/common/KeoCardBinder.kt; tools:text chỉ để xem trước trong Android Studio.
+-->
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="@dimen/space_12"
+    android:clickable="true"
+    android:focusable="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="@dimen/space_16">
+
+        <!-- Hàng 1: icon môn + tên kèo + địa điểm -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:id="@+id/iv_sport"
+                style="@style/Widget.KeoNhanh.SportTile"
+                android:layout_width="@dimen/sport_tile"
+                android:layout_height="@dimen/sport_tile"
+                android:src="@drawable/ic_sports_soccer_24" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/space_16"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/tv_title"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:maxLines="2"
+                    android:textAppearance="?attr/textAppearanceTitleLarge"
+                    tools:text="Đá bóng 7 người" />
+
+                <TextView
+                    android:id="@+id/tv_subtitle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/space_4"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:textAppearance="?attr/textAppearanceBodyMedium"
+                    android:textColor="?attr/colorOnSurfaceVariant"
+                    tools:text="Sân bóng gần cổng trường · 0,8 km" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Hàng 2: avatar chồng nhau + số người + hạn chốt -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_16"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/tv_avatar_1"
+                style="@style/Widget.KeoNhanh.Avatar.Small"
+                android:layout_width="@dimen/avatar_sm"
+                android:layout_height="@dimen/avatar_sm"
+                tools:text="A" />
+
+            <TextView
+                android:id="@+id/tv_avatar_2"
+                style="@style/Widget.KeoNhanh.Avatar.Small"
+                android:layout_width="@dimen/avatar_sm"
+                android:layout_height="@dimen/avatar_sm"
+                android:layout_marginStart="@dimen/avatar_overlap"
+                android:backgroundTint="@color/kn_avatar_2"
+                tools:text="M" />
+
+            <TextView
+                android:id="@+id/tv_avatar_3"
+                style="@style/Widget.KeoNhanh.Avatar.Small"
+                android:layout_width="@dimen/avatar_sm"
+                android:layout_height="@dimen/avatar_sm"
+                android:layout_marginStart="@dimen/avatar_overlap"
+                android:backgroundTint="@color/kn_avatar_3"
+                tools:text="T" />
+
+            <TextView
+                android:id="@+id/tv_avatar_more"
+                style="@style/Widget.KeoNhanh.Avatar.Small"
+                android:layout_width="@dimen/avatar_sm"
+                android:layout_height="@dimen/avatar_sm"
+                android:layout_marginStart="@dimen/avatar_overlap"
+                android:backgroundTint="@color/kn_avatar_5"
+                tools:text="+2" />
+
+            <TextView
+                android:id="@+id/tv_slots"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/space_12"
+                android:layout_weight="1"
+                android:maxLines="1"
+                android:textAppearance="?attr/textAppearanceBodyLarge"
+                tools:text="5/7 người" />
+
+            <TextView
+                android:id="@+id/tv_deadline"
+                style="@style/Widget.KeoNhanh.Badge.Orange"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:drawableStart="@drawable/ic_timer_16"
+                tools:text="Chốt sau 24:10" />
+        </LinearLayout>
+
+        <!-- Hàng 3: ngưỡng uy tín + nút "Xem kèo" (nút chỉ hiện ở thẻ xem trước của S09) -->
+        <LinearLayout
+            android:id="@+id/row_trust"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_12"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/tv_trust"
+                style="@style/Widget.KeoNhanh.Badge.Green"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:drawableStart="@drawable/ic_verified_user_16"
+                tools:text="Uy tín ≥ 70%" />
+
+            <Space
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_view_keo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/explore_view_keo"
+                android:visibility="gone"
+                tools:visibility="visible" />
+        </LinearLayout>
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>

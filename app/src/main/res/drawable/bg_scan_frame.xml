@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 4 góc khung quét QR ở S07 -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="240dp"
+    android:height="240dp"
+    android:viewportWidth="240"
+    android:viewportHeight="240">
+    <path
+        android:pathData="M4,64 L4,24 Q4,4 24,4 L64,4 M176,4 L216,4 Q236,4 236,24 L236,64 M236,176 L236,216 Q236,236 216,236 L176,236 M64,236 L24,236 Q4,236 4,216 L4,176"
+        android:strokeWidth="6"
+        android:strokeColor="@color/kn_green"
+        android:strokeLineCap="round" />
+</vector>

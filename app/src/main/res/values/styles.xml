@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Style của các component dùng chung (bảng component ở mục 4 tài liệu tuần 2).
+  Layout chỉ cần style="@style/Widget.KeoNhanh.Badge.Green"... thay vì lặp lại màu, padding.
+-->
+<resources>
+
+    <!-- Nút -->
+    <style name="Widget.KeoNhanh.Button" parent="Widget.Material3.Button">
+        <item name="cornerRadius">@dimen/radius_button</item>
+        <item name="android:minHeight">@dimen/button_height</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+    </style>
+
+    <style name="Widget.KeoNhanh.Button.Outlined" parent="Widget.Material3.Button.OutlinedButton">
+        <item name="cornerRadius">@dimen/radius_button</item>
+        <item name="android:minHeight">@dimen/button_height</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+        <item name="strokeColor">@color/kn_green</item>
+        <item name="android:textColor">@color/kn_green_text</item>
+        <item name="iconTint">@color/kn_green_text</item>
+    </style>
+
+    <!-- Nút vuông chỉ có icon (nút chat ở S15, nút gửi ở S16) -->
+    <style name="Widget.KeoNhanh.Button.OutlinedIcon" parent="Widget.KeoNhanh.Button.Outlined">
+        <item name="android:minWidth">@dimen/button_height</item>
+        <item name="android:paddingStart">0dp</item>
+        <item name="android:paddingEnd">0dp</item>
+        <item name="iconPadding">0dp</item>
+        <item name="iconGravity">textStart</item>
+        <item name="strokeColor">@color/kn_outline</item>
+    </style>
+
+    <!-- Nút tròn nền xanh chỉ có icon (nút gửi ở S16) -->
+    <style name="Widget.KeoNhanh.Button.FilledIcon">
+        <item name="cornerRadius">@dimen/radius_pill</item>
+        <item name="android:minWidth">@dimen/touch_min</item>
+        <item name="android:minHeight">@dimen/touch_min</item>
+        <item name="android:paddingStart">0dp</item>
+        <item name="android:paddingEnd">0dp</item>
+        <item name="iconPadding">0dp</item>
+        <item name="iconGravity">textStart</item>
+        <item name="backgroundTint">@color/kn_green_text</item>
+        <item name="iconTint">@color/white</item>
+    </style>
+
+    <style name="Widget.KeoNhanh.Button.Text" parent="Widget.Material3.Button.TextButton">
+        <item name="android:textColor">@color/kn_green_text</item>
+    </style>
+
+    <!-- Nút nhỏ nền xanh nhạt: chuyển Bản đồ / Danh sách -->
+    <style name="Widget.KeoNhanh.Button.Tonal" parent="Widget.Material3.Button.TonalButton.Icon">
+        <item name="cornerRadius">@dimen/radius_pill</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+    </style>
+
+    <!-- Thẻ trắng bo 24dp, không đổ bóng -->
+    <style name="Widget.KeoNhanh.Card" parent="Widget.Material3.CardView.Filled">
+        <item name="cardBackgroundColor">@color/kn_surface</item>
+        <item name="cardCornerRadius">@dimen/radius_card</item>
+        <item name="cardElevation">0dp</item>
+        <item name="strokeWidth">0dp</item>
+    </style>
+
+    <!-- Ô nhập: viền xám đậm (đạt 3:1), xanh khi đang nhập -->
+    <style name="Widget.KeoNhanh.TextInputLayout" parent="Widget.Material3.TextInputLayout.OutlinedBox">
+        <item name="boxCornerRadiusTopStart">@dimen/radius_input</item>
+        <item name="boxCornerRadiusTopEnd">@dimen/radius_input</item>
+        <item name="boxCornerRadiusBottomStart">@dimen/radius_input</item>
+        <item name="boxCornerRadiusBottomEnd">@dimen/radius_input</item>
+        <item name="boxStrokeColor">@color/textfield_stroke</item>
+        <item name="boxBackgroundColor">@color/kn_surface</item>
+    </style>
+
+    <!-- Chip môn: chọn thì nền xanh chữ trắng (giống concept "Tất cả") -->
+    <style name="Widget.KeoNhanh.Chip.Filter" parent="Widget.Material3.Chip.Filter">
+        <item name="chipBackgroundColor">@color/chip_filter_bg</item>
+        <item name="chipStrokeColor">@color/chip_filter_stroke</item>
+        <item name="chipStrokeWidth">@dimen/stroke_thin</item>
+        <item name="chipCornerRadius">@dimen/radius_pill</item>
+        <item name="chipIconTint">@color/chip_filter_text</item>
+        <item name="android:textColor">@color/chip_filter_text</item>
+        <item name="android:textAppearance">?attr/textAppearanceLabelLarge</item>
+        <item name="checkedIconVisible">false</item>
+    </style>
+
+    <!-- Bottom nav: không có viên thuốc chỉ báo, tab đang chọn chữ xanh + icon tô đặc -->
+    <style name="Widget.KeoNhanh.BottomNavigation" parent="Widget.Material3.BottomNavigationView">
+        <item name="itemIconTint">@color/bottom_nav_item</item>
+        <item name="itemTextColor">@color/bottom_nav_item</item>
+        <item name="labelVisibilityMode">labeled</item>
+        <item name="itemActiveIndicatorStyle">@style/Widget.KeoNhanh.BottomNavigation.Indicator</item>
+    </style>
+
+    <style name="Widget.KeoNhanh.BottomNavigation.Indicator" parent="Widget.Material3.BottomNavigationView.ActiveIndicator">
+        <item name="android:color">@android:color/transparent</item>
+    </style>
+
+    <style name="Widget.KeoNhanh.Toolbar" parent="Widget.Material3.Toolbar">
+        <item name="titleTextAppearance">?attr/textAppearanceTitleLarge</item>
+        <item name="navigationIconTint">@color/kn_ink</item>
+    </style>
+
+    <!-- Badge (không bấm được): "Uy tín ≥ 70%", "Chốt sau 24:10", "Board game" -->
+    <style name="Widget.KeoNhanh.Badge" parent="">
+        <item name="android:background">@drawable/bg_pill</item>
+        <item name="android:paddingStart">@dimen/space_12</item>
+        <item name="android:paddingEnd">@dimen/space_12</item>
+        <item name="android:paddingTop">@dimen/space_4</item>
+        <item name="android:paddingBottom">@dimen/space_4</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:drawablePadding">@dimen/space_4</item>
+        <item name="android:maxLines">1</item>
+        <item name="android:textAppearance">?attr/textAppearanceLabelLarge</item>
+    </style>
+
+    <style name="Widget.KeoNhanh.Badge.Green">
+        <item name="android:backgroundTint">@color/kn_green_tint</item>
+        <item name="android:textColor">@color/kn_ink</item>
+        <item name="android:drawableTint">@color/kn_green_text</item>
+    </style>
+
+    <style name="Widget.KeoNhanh.Badge.Orange">
+        <item name="android:backgroundTint">@color/kn_orange_tint</item>
+        <item name="android:textColor">@color/kn_orange_text</item>
+        <item name="android:drawableTint">@color/kn_orange_text</item>
+    </style>
+
+    <style name="Widget.KeoNhanh.Badge.Purple">
+        <item name="android:backgroundTint">@color/kn_purple_tint</item>
+        <item name="android:textColor">@color/kn_purple_text</item>
+        <item name="android:drawableTint">@color/kn_purple_text</item>
+    </style>
+
+    <!-- Avatar chữ cái đầu: màu nền gán trong code (util/Avatar.kt) -->
+    <style name="Widget.KeoNhanh.Avatar" parent="">
+        <item name="android:background">@drawable/bg_avatar</item>
+        <item name="android:backgroundTint">@color/kn_avatar_1</item>
+        <item name="android:gravity">center</item>
+        <item name="android:maxLines">1</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textAppearance">?attr/textAppearanceTitleMedium</item>
+    </style>
+
+    <style name="Widget.KeoNhanh.Avatar.Small">
+        <item name="android:textAppearance">?attr/textAppearanceLabelLarge</item>
+    </style>
+
+    <style name="Widget.KeoNhanh.Avatar.Large">
+        <item name="android:textAppearance">?attr/textAppearanceHeadlineSmall</item>
+    </style>
+
+    <!-- Ô vuông bo góc chứa icon môn: màu nền gán trong code theo môn -->
+    <style name="Widget.KeoNhanh.SportTile" parent="">
+        <item name="android:background">@drawable/bg_sport_tile</item>
+        <item name="android:backgroundTint">@color/kn_green</item>
+        <item name="android:padding">@dimen/space_16</item>
+        <item name="tint">@color/white</item>
+        <item name="android:importantForAccessibility">no</item>
+    </style>
+
+    <!-- Icon nhỏ đứng đầu một dòng thông tin (địa điểm, giờ...) -->
+    <!-- Dùng kèm android:layout_width/height="@dimen/icon_sm" -->
+    <style name="Widget.KeoNhanh.RowIcon" parent="">
+        <item name="tint">@color/kn_green_text</item>
+        <item name="android:importantForAccessibility">no</item>
+    </style>
+</resources>

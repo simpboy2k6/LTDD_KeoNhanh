@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Thẻ check-in theo khoảng cách (TV1 giữ), nhúng vào S15 khi kèo ở trạng thái Check-in.
+  7 trạng thái gán trong ui/checkin/CheckInCard.kt: chưa tới giờ, còn xa, GPS chưa chính xác,
+  đủ gần, chưa cấp quyền, đã check-in, quá giờ. Nút "Check-in" chính nằm ở thanh nút dưới của S15.
+-->
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="@dimen/space_16">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:id="@+id/iv_checkin_icon"
+                android:layout_width="@dimen/icon_md"
+                android:layout_height="@dimen/icon_md"
+                android:importantForAccessibility="no"
+                android:src="@drawable/ic_my_location_24"
+                app:tint="@color/kn_green_text" />
+
+            <TextView
+                android:id="@+id/tv_checkin_title"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/space_12"
+                android:layout_weight="1"
+                android:maxLines="2"
+                android:textAppearance="?attr/textAppearanceTitleMedium"
+                tools:text="Bạn đã ở điểm hẹn" />
+
+            <!-- Khung giờ check-in: giờ hẹn ± 15 phút -->
+            <TextView
+                android:id="@+id/tv_checkin_window"
+                style="@style/Widget.KeoNhanh.Badge.Green"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/space_8"
+                android:drawableStart="@drawable/ic_timer_16"
+                tools:text="16:45 – 17:15" />
+        </LinearLayout>
+
+        <!-- Khoảng cách tới điểm hẹn, chỉ hiện ở trạng thái "còn xa" và "đủ gần" -->
+        <TextView
+            android:id="@+id/tv_checkin_distance"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_12"
+            android:textAppearance="?attr/textAppearanceHeadlineSmall"
+            android:textColor="@color/kn_green_text"
+            tools:text="42 m" />
+
+        <TextView
+            android:id="@+id/tv_checkin_detail"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_4"
+            android:textAppearance="?attr/textAppearanceBodyMedium"
+            android:textColor="?attr/colorOnSurfaceVariant"
+            tools:text="Sai số GPS ±18 m · cần trong 100 m" />
+
+        <!-- Hành động phụ: "Mở bản đồ" (còn xa) hoặc "Đo lại" (GPS chưa chính xác) -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_checkin_secondary"
+            style="?attr/materialButtonOutlinedStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_12"
+            android:visibility="gone"
+            tools:text="Mở bản đồ"
+            tools:visibility="visible" />
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>

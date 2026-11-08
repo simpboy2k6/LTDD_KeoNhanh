@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  S13 Chọn điểm hẹn (TV2, nâng lên P0 vì check-in tính theo khoảng cách tới điểm này).
+  Ghim luôn nằm giữa bản đồ; vòng tròn minh họa bán kính check-in 100 m.
+  Tuần 3: thay iv_map bằng MapView của osmdroid, đọc tọa độ tâm bản đồ khi bấm "Dùng vị trí này".
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".ui.create.PickLocationFragment">
+
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        app:navigationContentDescription="@string/action_back"
+        app:navigationIcon="@drawable/ic_arrow_back_24"
+        app:title="@string/pick_title" />
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <ImageView
+            android:id="@+id/iv_map"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:contentDescription="@string/cd_map_pick"
+            android:scaleType="centerCrop"
+            android:src="@drawable/img_map_placeholder" />
+
+        <View
+            android:layout_width="@dimen/checkin_radius_preview"
+            android:layout_height="@dimen/checkin_radius_preview"
+            android:layout_gravity="center"
+            android:background="@drawable/bg_checkin_radius" />
+
+        <!-- Đầu nhọn của ghim nằm đúng tâm bản đồ -->
+        <ImageView
+            android:layout_width="@dimen/pin_size"
+            android:layout_height="@dimen/pin_size"
+            android:layout_gravity="center"
+            android:importantForAccessibility="no"
+            android:src="@drawable/ic_location_on_24"
+            android:translationY="@dimen/pin_offset"
+            app:tint="@color/kn_green_text" />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fab_my_location"
+            style="@style/Widget.Material3.FloatingActionButton.Surface"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:layout_margin="@dimen/space_16"
+            android:contentDescription="@string/cd_my_location"
+            app:srcCompat="@drawable/ic_my_location_24" />
+    </FrameLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_sheet_top"
+        android:orientation="vertical"
+        android:padding="@dimen/space_24">
+
+        <TextView
+            android:id="@+id/tv_place"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?attr/textAppearanceTitleMedium"
+            tools:text="Sân bóng gần cổng trường" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_4"
+            android:text="@string/pick_hint"
+            android:textAppearance="?attr/textAppearanceBodyMedium"
+            android:textColor="?attr/colorOnSurfaceVariant" />
+
+        <TextView
+            android:id="@+id/tv_radius_note"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_4"
+            android:textAppearance="?attr/textAppearanceBodyMedium"
+            android:textColor="@color/kn_green_text"
+            tools:text="Vòng tròn là vùng check-in 100 m quanh điểm hẹn" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_confirm"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_16"
+            android:text="@string/pick_confirm" />
+    </LinearLayout>
+</LinearLayout>
