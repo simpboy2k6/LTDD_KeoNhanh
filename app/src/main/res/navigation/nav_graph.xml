@@ -98,7 +98,41 @@
         android:id="@+id/loginFragment"
         android:name="com.keonhanh.app.ui.auth.LoginFragment"
         android:label="S02 Đăng nhập"
-        tools:layout="@layout/fragment_login" />
+        tools:layout="@layout/fragment_login">
+
+        <!-- Chuyển sang màn Đăng ký -->
+        <action
+            android:id="@+id/action_login_to_register"
+            app:destination="@id/registerFragment" />
+
+        <!-- Đăng nhập thành công -> vào màn Khám phá, xóa luồng đăng nhập khỏi bộ nhớ -->
+        <action
+            android:id="@+id/action_login_to_explore_graph"
+            app:destination="@id/explore_graph"
+            app:popUpTo="@id/loginFragment"
+            app:popUpToInclusive="true" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/registerFragment"
+        android:name="com.keonhanh.app.ui.auth.RegisterFragment"
+        android:label="S03 Đăng ký"
+        tools:layout="@layout/fragment_register">
+
+        <!-- Nhấn nút "Đăng nhập" để quay lại -->
+        <action
+            android:id="@+id/action_register_to_login"
+            app:destination="@id/loginFragment"
+            app:popUpTo="@id/loginFragment"
+            app:popUpToInclusive="false" />
+
+        <!-- Đăng ký thành công -> vào màn Khám phá, xóa luồng đăng ký khỏi bộ nhớ -->
+        <action
+            android:id="@+id/action_register_to_explore_graph"
+            app:destination="@id/explore_graph"
+            app:popUpTo="@id/loginFragment"
+            app:popUpToInclusive="true" />
+    </fragment>
 
     <fragment
         android:id="@+id/createKeoFragment"

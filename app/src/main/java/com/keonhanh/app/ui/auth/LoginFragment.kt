@@ -4,7 +4,9 @@ import android.os.Bundle
 import android.view.View
 import androidx.activity.addCallback
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
+import com.keonhanh.app.KeoNhanhApp
 import com.keonhanh.app.R
 import com.keonhanh.app.databinding.FragmentLoginBinding
 import com.keonhanh.app.util.showComingSoon
@@ -28,7 +30,9 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
             // Tuần 3: kiểm tra email trường + FirebaseAuth.signInWithEmailAndPassword rồi mới quay lại
             findNavController().popBackStack()
         }
-        binding.btnRegister.setOnClickListener { it.showComingSoon() }
+        binding.btnRegister.setOnClickListener {
+            findNavController().navigate(R.id.action_login_to_register)
+        }
         binding.btnForgotPassword.setOnClickListener { it.showComingSoon() }
     }
 

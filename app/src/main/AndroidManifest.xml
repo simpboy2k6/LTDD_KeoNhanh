@@ -4,6 +4,7 @@
     <!-- Tuần 3 thêm quyền vị trí, tuần 4 thêm quyền camera và thông báo -->
 
     <application
+        android:name=".KeoNhanhApp"
         android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
