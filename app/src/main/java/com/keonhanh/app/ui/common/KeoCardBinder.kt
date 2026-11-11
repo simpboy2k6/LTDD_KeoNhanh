@@ -21,7 +21,7 @@ fun ItemKeoBinding.bind(keo: Keo, showViewButton: Boolean = false) {
 
     tvTitle.text = keo.title
     tvSubtitle.text = ctx.getString(R.string.keo_place_distance, keo.place, formatKm(keo.distanceKm))
-    tvSlots.text = ctx.getString(R.string.keo_slots, keo.members.size, keo.maxSlots)
+    tvSlots.text = ctx.getString(R.string.keo_slots, keo.memberCount, keo.maxSlots)
     tvDeadline.text = if (keo.status == KeoStatus.CHECK_IN) {
         ctx.getString(R.string.keo_checking_in)
     } else {

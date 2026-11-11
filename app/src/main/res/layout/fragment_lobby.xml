@@ -17,7 +17,26 @@
         app:navigationIcon="@drawable/ic_arrow_back_24"
         app:title="@string/lobby_title" />
 
+    <!-- Tuần 3: thanh tải trong lúc chờ Firestore trả dữ liệu lần đầu -->
+    <com.google.android.material.progressindicator.LinearProgressIndicator
+        android:id="@+id/progress_loading"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:indeterminate="true"
+        android:visibility="gone"
+        app:indicatorColor="@color/kn_green" />
+
+    <!-- Tuần 3: kèo không mở được (đã bị hủy, mất mạng, không có quyền) -->
+    <include
+        android:id="@+id/error_state"
+        layout="@layout/view_empty_state"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:visibility="gone" />
+
     <androidx.core.widget.NestedScrollView
+        android:id="@+id/scroll_content"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1">
@@ -305,6 +324,7 @@
 
     <!-- Nút chính đổi theo trạng thái kèo và vai trò (bảng ở mục 3 tài liệu tuần 2) -->
     <LinearLayout
+        android:id="@+id/bar_actions"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"

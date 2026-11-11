@@ -2,6 +2,7 @@
 <!--
   Menu thanh tiêu đề S15.
   - Mời bằng mã QR: hiện khi kèo đang mở và mình đã là thành viên hoặc chủ kèo.
+  - Duyệt người xin vào (n): chỉ chủ kèo thấy khi có người xin vào; tạm thay cho màn S08.
   - Đổi trạng thái check-in (demo): chỉ để quay video tuần 2, xóa ở tuần 4.
 -->
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
@@ -11,6 +12,11 @@
         android:icon="@drawable/ic_qr_code_2_24"
         android:title="@string/menu_invite"
         app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/action_requests"
+        android:title="@string/menu_requests"
+        android:visible="false"
+        app:showAsAction="never" />
     <item
         android:id="@+id/action_demo_checkin"
         android:title="@string/menu_demo_checkin"

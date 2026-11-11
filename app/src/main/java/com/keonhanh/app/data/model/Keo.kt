@@ -31,8 +31,9 @@ data class Member(
 )
 
 /**
- * Một kèo. Tuần 2 dùng chuỗi hiển thị sẵn (time, deadlineCountdown, checkInWindow) cho layout tĩnh.
- * Tuần 3: đổi sang Timestamp và GeoPoint của Firestore.
+ * Một kèo, ở dạng sẵn sàng để hiển thị (chuỗi giờ, đếm ngược, khung check-in đã định dạng).
+ * Tuần 3: dữ liệu thật đọc từ Firestore vào KeoDoc (data/remote), rồi đổi sang Keo bằng KeoDoc.toKeo(...)
+ * trong data/remote/Mappers.kt; layout và Adapter tuần 2 dùng tiếp Keo nên không phải sửa.
  */
 data class Keo(
     val id: String,
@@ -51,4 +52,9 @@ data class Keo(
     val status: KeoStatus = KeoStatus.OPEN,
     val checkInWindow: String = "",
     val myRole: MyRole = MyRole.NONE,
+    /**
+     * Số thành viên. Danh sách ở Khám phá và Kèo của tôi không tải từng thành viên (đỡ tốn lượt đọc)
+     * nên [members] có thể rỗng; số người lấy từ trường memberCount lưu sẵn trên Firestore.
+     */
+    val memberCount: Int = members.size,
 )
