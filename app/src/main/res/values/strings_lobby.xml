@@ -18,11 +18,44 @@
     <string name="menu_demo_checkin">Đổi trạng thái check-in (demo)</string>
     <string name="cd_open_chat">Mở chat phòng chờ</string>
 
+    <!-- S15, tuần 3: nút chính theo trạng thái kèo và vai trò -->
+    <string name="lobby_host_line_no_trust">%1$s · Chủ kèo: %2$s</string>
+    <string name="lobby_cancel_request">Hủy yêu cầu xin vào</string>
+    <string name="lobby_full">Đã đủ người</string>
+    <string name="lobby_locked">Đã chốt</string>
+    <string name="lobby_locked_member">Đã chốt · vắng mặt tính là bùng kèo</string>
+    <string name="lobby_ended">Kèo đã kết thúc</string>
+    <string name="lobby_error_title">Không mở được kèo</string>
+
+    <!-- S15, tuần 3: thông báo sau khi bấm -->
+    <string name="lobby_joined">Bạn đã vào kèo</string>
+    <string name="lobby_requested">Đã gửi yêu cầu, chờ chủ kèo duyệt</string>
+    <string name="lobby_left">Bạn đã rời kèo</string>
+    <string name="lobby_cancelled">Đã hủy kèo</string>
+    <string name="lobby_approved">Đã duyệt vào kèo</string>
+    <string name="lobby_rejected">Đã từ chối</string>
+    <string name="lobby_chat_locked">Vào kèo để xem chat phòng chờ</string>
+    <string name="lobby_chat_empty">Chưa có tin nhắn nào</string>
+
+    <!-- S15, tuần 3: hộp thoại hỏi lại (S19) và duyệt người xin vào (thay S08) -->
+    <string name="dialog_leave_title">Rời kèo này?</string>
+    <string name="dialog_leave_message">Bạn vào lại được nếu kèo còn chỗ và chưa tới hạn chốt.</string>
+    <string name="dialog_cancel_title">Hủy kèo?</string>
+    <string name="dialog_cancel_message">Phòng chờ và tin nhắn sẽ bị xóa. Hủy sau hạn chốt sẽ bị trừ điểm uy tín.</string>
+    <string name="dialog_dismiss">Không</string>
+    <string name="menu_requests">Duyệt người xin vào (%1$d)</string>
+    <string name="dialog_requests_title">Người xin vào</string>
+    <string name="dialog_request_title">%1$s xin vào kèo</string>
+    <string name="action_approve">Duyệt</string>
+    <string name="action_reject">Từ chối</string>
+
     <!-- S16 Chat phòng chờ -->
     <string name="chat_members_subtitle">%1$d thành viên</string>
     <string name="chat_sender_time">%1$s · %2$s</string>
     <string name="chat_hint">Nhắn cho cả phòng…</string>
     <string name="cd_send">Gửi tin nhắn</string>
+    <string name="chat_delete_title">Xóa tin nhắn này?</string>
+    <string name="chat_delete_confirm">Xóa</string>
 
     <!-- S17 Kèo của tôi -->
     <string name="my_keo_title">Kèo của tôi</string>
@@ -31,6 +64,9 @@
     <string name="my_keo_tab_done">Đã xong</string>
     <string name="my_keo_empty_title">Chưa có kèo nào ở đây</string>
     <string name="my_keo_empty_message">Kèo đã kết thúc sẽ hiện ở tab này</string>
+    <string name="my_keo_empty_joined">Kèo bạn tham gia sẽ hiện ở tab này</string>
+    <string name="my_keo_empty_hosting">Kèo bạn tạo sẽ hiện ở tab này</string>
+    <string name="my_keo_error_title">Không tải được kèo của bạn</string>
 
     <!-- S18 Danh sách chat -->
     <string name="chat_list_title">Chat</string>

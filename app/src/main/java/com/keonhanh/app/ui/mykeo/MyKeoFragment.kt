@@ -8,10 +8,11 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.tabs.TabLayout
 import com.keonhanh.app.R
-import com.keonhanh.app.data.model.MyRole
-import com.keonhanh.app.data.sample.SampleData
 import com.keonhanh.app.databinding.FragmentMyKeoBinding
 import com.keonhanh.app.ui.common.KeoAdapter
+import com.keonhanh.app.ui.common.UiState
+import com.keonhanh.app.ui.common.appViewModels
+import com.keonhanh.app.ui.common.collectWhenStarted
 import com.keonhanh.app.ui.lobby.LobbyFragment
 
 /** S17 Kèo của tôi (TV3). Layout: res/layout/fragment_my_keo.xml */
@@ -19,6 +20,10 @@ class MyKeoFragment : Fragment(R.layout.fragment_my_keo) {
 
     private var _binding: FragmentMyKeoBinding? = null
     private val binding get() = _binding!!
+
+    private val viewModel by appViewModels { container ->
+        MyKeoViewModel(container.memberRepository, container.keoRepository, container.authRepository)
+    }
 
     private lateinit var adapter: KeoAdapter
 
@@ -34,26 +39,50 @@ class MyKeoFragment : Fragment(R.layout.fragment_my_keo) {
         }
         binding.rvKeo.adapter = adapter
 
-        binding.empty.tvEmptyTitle.setText(R.string.my_keo_empty_title)
-        binding.empty.tvEmptyMessage.setText(R.string.my_keo_empty_message)
-
         binding.tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
-            override fun onTabSelected(tab: TabLayout.Tab) = showTab(tab.position)
+            override fun onTabSelected(tab: TabLayout.Tab) = render(viewModel.state.value)
             override fun onTabUnselected(tab: TabLayout.Tab) = Unit
             override fun onTabReselected(tab: TabLayout.Tab) = Unit
         })
-        showTab(binding.tabLayout.selectedTabPosition.coerceAtLeast(0))
+
+        collectWhenStarted(viewModel.state) { render(it) }
     }
 
-    /** Tab 0: đang tham gia · tab 1: đang làm chủ · tab 2: đã xong (chưa có dữ liệu mẫu → trạng thái rỗng) */
-    private fun showTab(position: Int) {
-        val items = when (position) {
-            0 -> SampleData.keos.filter { it.myRole == MyRole.MEMBER }
-            1 -> SampleData.keos.filter { it.myRole == MyRole.HOST }
-            else -> emptyList()
+    /** Tab 0: đang tham gia · tab 1: đang làm chủ · tab 2: đã xong */
+    private fun render(state: UiState<MyKeoUi>) {
+        binding.progressLoading.isVisible = state is UiState.Loading
+        when (state) {
+            UiState.Loading -> {
+                adapter.submitList(emptyList())
+                binding.empty.root.isVisible = false
+            }
+            is UiState.Error -> {
+                adapter.submitList(emptyList())
+                binding.empty.root.isVisible = true
+                binding.empty.ivEmptyIcon.setImageResource(R.drawable.ic_error_24)
+                binding.empty.tvEmptyTitle.setText(R.string.my_keo_error_title)
+                binding.empty.tvEmptyMessage.text = state.message.resolve(requireContext())
+            }
+            is UiState.Success -> {
+                val tab = binding.tabLayout.selectedTabPosition.coerceAtLeast(0)
+                val items = when (tab) {
+                    0 -> state.data.joined
+                    1 -> state.data.hosting
+                    else -> state.data.done
+                }
+                adapter.submitList(items)
+                binding.empty.root.isVisible = items.isEmpty()
+                binding.empty.ivEmptyIcon.setImageResource(R.drawable.ic_event_note_24)
+                binding.empty.tvEmptyTitle.setText(R.string.my_keo_empty_title)
+                binding.empty.tvEmptyMessage.setText(
+                    when (tab) {
+                        0 -> R.string.my_keo_empty_joined
+                        1 -> R.string.my_keo_empty_hosting
+                        else -> R.string.my_keo_empty_message
+                    },
+                )
+            }
         }
-        adapter.submitList(items)
-        binding.empty.root.isVisible = items.isEmpty()
     }
 
     override fun onDestroyView() {

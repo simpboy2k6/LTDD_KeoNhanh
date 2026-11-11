@@ -1,0 +1,170 @@
+rules_version = '2';
+
+// Luật truy cập Firestore của KèoNhanh (tuần 3).
+// Cách áp dụng: Firebase console > Firestore Database > Rules > dán toàn bộ file này > Publish.
+// Gói Spark không có server, nên đây là chỗ DUY NHẤT chặn người dùng ghi bậy (sửa memberCount, xóa tin người khác...).
+//
+// Ai giữ phần nào:
+//   users     : Minh Khoa
+//   keos      : Huy Hoàng (riêng hàm memberCountStep do Phong Hào viết, vì transaction tham gia/rời sửa memberCount)
+//   members   : Phong Hào
+//   messages  : Phong Hào
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ---------- Hàm dùng chung ----------
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function keoPath(keoId) {
+      return /databases/$(database)/documents/keos/$(keoId);
+    }
+
+    function memberPath(keoId, uid) {
+      return /databases/$(database)/documents/keos/$(keoId)/members/$(uid);
+    }
+
+    // Dữ liệu kèo TRƯỚC và SAU thao tác (trong transaction/batch, getAfter thấy kết quả sau khi ghi)
+    function keoBefore(keoId) {
+      return get(keoPath(keoId)).data;
+    }
+
+    function keoAfter(keoId) {
+      return getAfter(keoPath(keoId)).data;
+    }
+
+    function isHost(keoId) {
+      return signedIn() && keoBefore(keoId).hostId == request.auth.uid;
+    }
+
+    function wasJoined(keoId, uid) {
+      return exists(memberPath(keoId, uid)) && get(memberPath(keoId, uid)).data.state == 'JOINED';
+    }
+
+    function isJoinedAfter(keoId, uid) {
+      return existsAfter(memberPath(keoId, uid)) && getAfter(memberPath(keoId, uid)).data.state == 'JOINED';
+    }
+
+    function beforeDeadline(keoId) {
+      return request.time < keoBefore(keoId).deadlineAt;
+    }
+
+    // ---------- users/{uid} (Minh Khoa) ----------
+
+    match /users/{uid} {
+      allow read: if signedIn();
+      allow create, update: if signedIn() && request.auth.uid == uid;
+      allow delete: if false;
+    }
+
+    // ---------- keos/{keoId} (Huy Hoàng) ----------
+
+    // Phong Hào: memberCount chỉ được +1/-1, đúng lúc document thành viên tương ứng được thêm/xóa trong cùng transaction.
+    function memberCountStep(keoId) {
+      let before = resource.data.memberCount;
+      let after = request.resource.data.memberCount;
+      let me = request.auth.uid;
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly(['memberCount', 'updatedAt'])
+        && beforeDeadline(keoId)
+        && (
+          // +1: chính mình vừa thành JOINED (Tham gia kèo), hoặc chủ kèo vừa duyệt một người xin vào
+          (after == before + 1 && after <= resource.data.capacity
+            && (isHost(keoId) || (!wasJoined(keoId, me) && isJoinedAfter(keoId, me))))
+          // -1: chính mình đang JOINED và vừa xóa document của mình (Rời kèo)
+          || (after == before - 1 && wasJoined(keoId, me) && !existsAfter(memberPath(keoId, me)))
+        );
+    }
+
+    match /keos/{keoId} {
+      allow read: if signedIn();
+
+      // Tạo kèo: mình là chủ, memberCount = 1, và document members/{mình} (role HOST) được tạo trong cùng batch
+      allow create: if signedIn()
+        && request.resource.data.hostId == request.auth.uid
+        && request.resource.data.memberCount == 1
+        && isJoinedAfter(keoId, request.auth.uid);
+
+      // Sửa kèo: chủ kèo sửa nội dung nhưng không đổi hostId, memberCount, inviteCode;
+      // hoặc thành viên đổi memberCount theo memberCountStep (Phong Hào)
+      allow update: if (isHost(keoId)
+          && request.resource.data.hostId == resource.data.hostId
+          && request.resource.data.memberCount == resource.data.memberCount
+          && request.resource.data.inviteCode == resource.data.inviteCode)
+        || (signedIn() && memberCountStep(keoId));
+
+      allow delete: if isHost(keoId);
+
+      // ---------- keos/{keoId}/members/{uid} (Phong Hào) ----------
+
+      match /members/{uid} {
+        allow read: if signedIn();
+
+        // Chủ kèo: document HOST của chính mình, tạo cùng batch với kèo (kèo chưa tồn tại trước đó)
+        allow create: if signedIn() && request.auth.uid == uid
+          && request.resource.data.uid == uid
+          && request.resource.data.role == 'HOST'
+          && request.resource.data.state == 'JOINED'
+          && !exists(keoPath(keoId))
+          && keoAfter(keoId).hostId == uid;
+
+        // Người chơi tự vào: chỉ tạo document của chính mình, role MEMBER, trước hạn chốt.
+        // JOINED (kèo không có ngưỡng) thì phải tăng memberCount cùng lúc; REQUESTED (Xin vào) thì không.
+        allow create: if signedIn() && request.auth.uid == uid
+          && request.resource.data.uid == uid
+          && request.resource.data.role == 'MEMBER'
+          && beforeDeadline(keoId)
+          && (
+            (request.resource.data.state == 'JOINED'
+              && keoBefore(keoId).minTrust == null
+              && keoAfter(keoId).memberCount == keoBefore(keoId).memberCount + 1)
+            || (request.resource.data.state == 'REQUESTED'
+              && keoAfter(keoId).memberCount == keoBefore(keoId).memberCount)
+          );
+
+        // Chủ kèo duyệt: REQUESTED -> JOINED, tăng memberCount cùng lúc
+        allow update: if isHost(keoId)
+          && resource.data.state == 'REQUESTED'
+          && request.resource.data.state == 'JOINED'
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['state', 'joinedAt'])
+          && keoAfter(keoId).memberCount == keoBefore(keoId).memberCount + 1;
+        // Tuần 4 (Minh Khoa): thêm luật cho thành viên tự ghi checkInAt, checkInDistanceM, attendance của mình.
+
+        // Rời kèo: tự xóa mình trước hạn chốt (đang JOINED thì phải giảm memberCount cùng lúc);
+        // chủ kèo xóa được mọi người (từ chối người xin vào, hoặc khi hủy cả kèo)
+        allow delete: if (signedIn() && request.auth.uid == uid
+            && resource.data.role != 'HOST'
+            && beforeDeadline(keoId)
+            && (resource.data.state == 'REQUESTED'
+              || keoAfter(keoId).memberCount == keoBefore(keoId).memberCount - 1))
+          || isHost(keoId);
+      }
+
+      // ---------- keos/{keoId}/messages/{msgId} (Phong Hào) ----------
+
+      match /messages/{msgId} {
+        // Chỉ thành viên đã vào kèo (kể cả chủ kèo) đọc và gửi được
+        allow read: if signedIn() && wasJoined(keoId, request.auth.uid);
+
+        allow create: if signedIn() && wasJoined(keoId, request.auth.uid)
+          && request.resource.data.senderId == request.auth.uid
+          && request.resource.data.text is string
+          && request.resource.data.text.size() > 0
+          && request.resource.data.text.size() <= 1000
+          && request.resource.data.sentAt == request.time;
+
+        allow update: if false;
+
+        // Người gửi xóa tin của mình; chủ kèo xóa được mọi tin (khi hủy kèo)
+        allow delete: if signedIn() && (resource.data.senderId == request.auth.uid || isHost(keoId));
+      }
+    }
+
+    // S17 Kèo của tôi: truy vấn collectionGroup('members') where uid == mình cần luật cho mọi đường dẫn .../members/...
+    match /{path=**}/members/{memberId} {
+      allow read: if signedIn();
+    }
+  }
+}
