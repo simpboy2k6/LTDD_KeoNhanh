@@ -8,7 +8,8 @@ Nhánh: `tuan3/hao`. Đọc mục 1–3 trước, rồi tới phần việc củ
 | --- | --- | --- |
 | `di/AppContainer.kt` | Tạo Firebase và mọi Repository, một lần khi mở app | Phong Hào |
 | `ui/common/FragmentExt.kt` | `appViewModels { }` tạo ViewModel có tham số; `collectWhenStarted(flow) { }` nghe dữ liệu trong Fragment | Phong Hào |
-| `ui/common/UiState.kt` | `UiState` (Loading / Success / Error), `UiText`, `AppException`, `toUiText()` | Phong Hào |
+| `ui/common/UiState.kt` | `UiState` (Loading / Success / Error), `UiText`, `toUiText()` | Phong Hào |
+| `data/repository/AppException.kt`, `data/remote/FirebaseErrors.kt` | Lỗi nghiệp vụ có câu thông báo sẵn; dịch lỗi Firebase (mạng, không có quyền) sang câu thông báo | Phong Hào |
 | `data/remote/FirestorePaths.kt` | Tên collection và tên trường; **không gõ chuỗi "keos", "members"... ở chỗ khác** | Phong Hào |
 | `data/remote/FirestoreDocs.kt` | `KeoDoc`, `MemberDoc`, `MessageDoc`, `KeoDraft`: bản sao đúng như document trên Firestore | Phong Hào |
 | `data/remote/Mappers.kt` | Firestore ↔ Doc ↔ model hiển thị (`KeoDoc.toKeo(...)`), định dạng giờ, đếm ngược | Phong Hào |
@@ -40,7 +41,7 @@ Quy tắc:
 - **Fragment không gọi Firestore, không gọi Repository.** Chỉ gọi ViewModel.
 - **ViewModel không giữ `Context`, không đụng View.** Chữ cho người dùng trả về dạng `UiText.Res(R.string.xxx)`, Fragment đổi thành chữ bằng `resolve(context)`.
 - **Ghi xong không tự sửa danh sách trên màn hình.** Listener Firestore báo về là màn hình tự đổi (cả trên máy người khác).
-- Chỉ code trong `data/` mới import `com.google.firebase...` (trừ `ui/common/UiState.kt` để dịch lỗi Firebase).
+- Chỉ code trong `data/` mới import `com.google.firebase...` (checklist mục 10): `grep -rl "com.google.firebase" app/src/main/java/com/keonhanh/app/ui` phải không in dòng nào.
 
 ## 3. Mẫu một màn hình theo khung
 

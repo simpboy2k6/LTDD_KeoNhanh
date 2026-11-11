@@ -9,7 +9,6 @@ import com.keonhanh.app.data.remote.MessageDoc
 import com.keonhanh.app.data.remote.MessageFields
 import com.keonhanh.app.data.remote.snapshotFlow
 import com.keonhanh.app.data.remote.toMessageDoc
-import com.keonhanh.app.ui.common.AppException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.tasks.await

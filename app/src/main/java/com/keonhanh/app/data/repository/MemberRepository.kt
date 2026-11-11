@@ -17,7 +17,6 @@ import com.keonhanh.app.data.remote.newMemberMap
 import com.keonhanh.app.data.remote.snapshotFlow
 import com.keonhanh.app.data.remote.toKeoDoc
 import com.keonhanh.app.data.remote.toMemberDoc
-import com.keonhanh.app.ui.common.AppException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.tasks.await
