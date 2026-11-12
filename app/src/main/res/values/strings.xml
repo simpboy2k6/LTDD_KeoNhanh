@@ -32,4 +32,21 @@
     <string name="keo_min_trust">Uy tín ≥ %1$d%%</string>
     <string name="keo_checking_in">Đang check-in</string>
     <string name="slot_empty" translatable="false">+</string>
+
+    <!-- Lỗi dùng chung (tuần 3): Repository ném AppException(R.string.error_...), Fragment hiện bằng Snackbar -->
+    <string name="error_generic">Có lỗi xảy ra, thử lại sau</string>
+    <string name="error_network">Mất kết nối mạng, thử lại sau</string>
+    <string name="error_permission">Bạn không có quyền làm việc này</string>
+    <string name="error_not_signed_in">Bạn cần đăng nhập trước</string>
+    <string name="error_not_ready">Phần này đang được làm, thử lại sau</string>
+    <string name="error_keo_not_found">Kèo không còn tồn tại</string>
+    <string name="error_keo_full">Kèo đã đủ người</string>
+    <string name="error_keo_closed">Kèo đã chốt, không vào được nữa</string>
+    <string name="error_already_member">Bạn đã ở trong kèo này</string>
+    <string name="error_need_request">Kèo có ngưỡng uy tín, hãy bấm Xin vào</string>
+    <string name="error_request_not_found">Yêu cầu xin vào không còn nữa</string>
+    <string name="error_not_member">Bạn không ở trong kèo này</string>
+    <string name="error_host_cannot_leave">Chủ kèo không rời được, hãy hủy kèo</string>
+    <string name="error_leave_locked">Đã qua hạn chốt, không rời kèo được nữa</string>
+    <string name="error_message_too_long">Tin nhắn quá dài (tối đa 1000 ký tự)</string>
 </resources>

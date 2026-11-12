@@ -19,7 +19,7 @@ import com.keonhanh.app.util.bindAvatar
  * - checkInMode (kèo đang Check-in): chỉ hiện thành viên; ai đã check-in có dấu tích, ai chưa thì mờ đi.
  */
 class MemberAdapter(
-    private val checkInMode: Boolean = false,
+    val checkInMode: Boolean = false,
 ) : ListAdapter<MemberAdapter.Slot, MemberAdapter.ViewHolder>(DiffCallback) {
 
     /** Một ô trong lưới; member = null là chỗ còn trống. */

@@ -2,7 +2,7 @@
 # Tuần 3 thêm Firebase (BoM), osmdroid; tuần 4 thêm Code Scanner + ZXing, WorkManager.
 [versions]
 agp = "8.7.3"
-kotlin = "2.0.21"
+kotlin = "2.4.0"
 coreKtx = "1.15.0"
 appcompat = "1.7.0"
 material = "1.12.0"
@@ -14,6 +14,7 @@ recyclerview = "1.3.2"
 junit = "4.13.2"
 androidxJunit = "1.2.1"
 espressoCore = "3.6.1"
+
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }

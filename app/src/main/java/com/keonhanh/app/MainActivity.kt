@@ -63,6 +63,8 @@ class MainActivity : AppCompatActivity() {
         if (savedInstanceState == null) {
             navController.navigate(R.id.action_global_login)
         }
+        val db = com.google.firebase.firestore.FirebaseFirestore.getInstance()
+        android.util.Log.d("FirebaseCheck", "Firestore kết nối thành công: $db")
     }
 
     /** Bottom nav tự chừa chỗ cho thanh điều hướng; màn ẩn bottom nav thì vùng nội dung phải tự chừa. */

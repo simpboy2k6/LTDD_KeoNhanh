@@ -25,6 +25,7 @@ object SampleData {
     val me = Member("me", "Minh Anh")
 
     val currentUser = UserProfile(
+        uid = "u1",
         name = "Nguyễn Minh Anh",
         email = "minhanh@sv.truong.edu.vn",
         attended = 9,
