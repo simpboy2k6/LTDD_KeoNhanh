@@ -43,6 +43,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.transformLatest
 import kotlinx.coroutines.launch
 
 /** Nút chính ở đáy S15, theo bảng nút mục 3 tài liệu tuần 2. ViewModel chọn nút, Fragment chỉ vẽ. */
@@ -105,22 +106,30 @@ class LobbyViewModel(
 
     private val myUid: String? get() = authRepository.currentUser?.uid
 
-    // shareIn: nhiều chỗ bên dưới cùng dùng một listener Firestore, không mở 2 listener cho cùng dữ liệu
-    private val keo: Flow<KeoDoc?> = keoRepository.observeKeo(keoId)
+    // shareIn: nhiều chỗ bên dưới cùng dùng một listener Firestore, không mở 2 listener cho cùng dữ liệu.
+    // Lỗi của listener (không có quyền, mất mạng) phải gói vào Result TRƯỚC shareIn:
+    // ngoại lệ lọt ra khỏi shareIn rơi thẳng vào viewModelScope và làm crash cả app.
+    private val keo: Flow<Result<KeoDoc?>> = keoRepository.observeKeo(keoId)
+        .asResult()
         .shareIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), replay = 1)
 
-    private val members: Flow<List<MemberDoc>> = memberRepository.observeMembers(keoId)
+    private val members: Flow<Result<List<MemberDoc>>> = memberRepository.observeMembers(keoId)
+        .asResult()
         .shareIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), replay = 1)
 
     /** Điểm uy tín chủ kèo: đọc hồ sơ một lần khi biết hostId. */
     private val hostTrust: Flow<Int?> = keo
-        .map { it?.hostId }
+        .map { it.getOrNull()?.hostId }
         .distinctUntilChanged()
-        .map { hostId -> hostId?.let { userRepository.getUserProfile(it).getOrNull()?.trustPercent } }
+        .transformLatest { hostId ->
+            // Phát null trước để màn hình hiện ngay; điểm uy tín hiện sau khi đọc xong hồ sơ chủ kèo
+            emit(null)
+            if (hostId != null) emit(userRepository.getUserProfile(hostId).getOrNull()?.trustPercent)
+        }
 
     /** Tin mới nhất: chỉ nghe khi mình đã là thành viên, người ngoài không có quyền đọc chat. */
     private val latestMessage: Flow<MessageDoc?> = members
-        .map { list -> list.any { it.uid == myUid && it.state == MemberState.JOINED } }
+        .map { result -> result.getOrNull().orEmpty().any { it.uid == myUid && it.state == MemberState.JOINED } }
         .distinctUntilChanged()
         .flatMapLatest { joined ->
             if (joined) chatRepository.observeLatestMessage(keoId).catch { emit(null) } else flowOf(null)
@@ -135,11 +144,13 @@ class LobbyViewModel(
     }
 
     val state: StateFlow<UiState<LobbyUi>> =
-        combine(keo, members, hostTrust, latestMessage, clock) { keoDoc, memberList, trust, latest, now ->
-            if (keoDoc == null) {
-                UiState.Error(UiText.Res(R.string.error_keo_not_found))
-            } else {
-                UiState.Success(buildUi(keoDoc, memberList, trust, latest, now))
+        combine(keo, members, hostTrust, latestMessage, clock) { keoResult, membersResult, trust, latest, now ->
+            val error = keoResult.exceptionOrNull() ?: membersResult.exceptionOrNull()
+            val keoDoc = keoResult.getOrNull()
+            when {
+                error != null -> UiState.Error(error.toUiText())
+                keoDoc == null -> UiState.Error(UiText.Res(R.string.error_keo_not_found))
+                else -> UiState.Success(buildUi(keoDoc, membersResult.getOrNull().orEmpty(), trust, latest, now))
             }
         }
             .catch { emit(UiState.Error(it.toUiText())) }
@@ -200,26 +211,6 @@ class LobbyViewModel(
         )
     }
 
-    /** Bảng nút: trạng thái kèo (hàng) × vai trò của mình (cột). */
-    private fun primaryActionFor(keo: Keo, myState: MemberState?): PrimaryAction = when (keo.status) {
-        KeoStatus.OPEN, KeoStatus.FULL -> when {
-            keo.myRole == MyRole.HOST -> PrimaryAction.CANCEL_KEO
-            keo.myRole == MyRole.MEMBER -> PrimaryAction.LEAVE
-            myState == MemberState.REQUESTED -> PrimaryAction.CANCEL_REQUEST
-            keo.status == KeoStatus.FULL -> PrimaryAction.FULL
-            keo.minTrust != null -> PrimaryAction.REQUEST_JOIN
-            else -> PrimaryAction.JOIN
-        }
-        KeoStatus.LOCKED -> when (keo.myRole) {
-            MyRole.HOST -> PrimaryAction.CANCEL_KEO
-            MyRole.MEMBER -> PrimaryAction.LOCKED_MEMBER
-            MyRole.NONE -> PrimaryAction.LOCKED
-        }
-        // Thành viên thấy thẻ check-in (Minh Khoa) thay cho nút này; người ngoài chỉ thấy nút mờ
-        KeoStatus.CHECK_IN -> PrimaryAction.CHECKING_IN
-        KeoStatus.ENDED -> PrimaryAction.ENDED
-    }
-
     private fun deadlineProgress(doc: KeoDoc, now: Long): Int {
         val start = doc.createdAt?.toDate()?.time ?: return 0
         val end = doc.deadlineAt.toDate().time
@@ -262,3 +253,30 @@ class LobbyViewModel(
         const val STOP_TIMEOUT_MS = 5_000L
     }
 }
+
+/**
+ * Bảng nút: trạng thái kèo (hàng) × vai trò của mình (cột).
+ * Hàm thuần (không đụng Firestore, không đụng View) nên có unit test riêng: PrimaryActionTest.
+ */
+internal fun primaryActionFor(keo: Keo, myState: MemberState?): PrimaryAction = when (keo.status) {
+    KeoStatus.OPEN, KeoStatus.FULL -> when {
+        keo.myRole == MyRole.HOST -> PrimaryAction.CANCEL_KEO
+        keo.myRole == MyRole.MEMBER -> PrimaryAction.LEAVE
+        myState == MemberState.REQUESTED -> PrimaryAction.CANCEL_REQUEST
+        keo.status == KeoStatus.FULL -> PrimaryAction.FULL
+        keo.minTrust != null -> PrimaryAction.REQUEST_JOIN
+        else -> PrimaryAction.JOIN
+    }
+    KeoStatus.LOCKED -> when (keo.myRole) {
+        MyRole.HOST -> PrimaryAction.CANCEL_KEO
+        MyRole.MEMBER -> PrimaryAction.LOCKED_MEMBER
+        MyRole.NONE -> PrimaryAction.LOCKED
+    }
+    // Thành viên thấy thẻ check-in (Minh Khoa) thay cho nút này; người ngoài chỉ thấy nút mờ
+    KeoStatus.CHECK_IN -> PrimaryAction.CHECKING_IN
+    KeoStatus.ENDED -> PrimaryAction.ENDED
+}
+
+/** Gói lỗi của Flow vào Result để đi qua shareIn an toàn (xem ghi chú ở LobbyViewModel.keo). */
+private fun <T> Flow<T>.asResult(): Flow<Result<T>> =
+    map { Result.success(it) }.catch { emit(Result.failure(it)) }

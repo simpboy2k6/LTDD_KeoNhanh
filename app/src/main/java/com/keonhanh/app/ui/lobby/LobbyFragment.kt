@@ -69,7 +69,31 @@ class LobbyFragment : Fragment(R.layout.fragment_lobby) {
         val nav = findNavController()
         val args = bundleOf(ARG_KEO_ID to keoId)
 
+        binding.cardChatPreview.setOnClickListener { nav.navigate(R.id.action_lobby_to_lobbyChat, args) }
+        binding.btnChat.setOnClickListener { nav.navigate(R.id.action_lobby_to_lobbyChat, args) }
+
+        if (keo.status == KeoStatus.CHECK_IN) {
+            // Mặc định trạng thái "đủ gần" để demo nút Check-in
+            demoStates = SampleData.checkInDemoStates(keo)
+            demoIndex = demoStates.indexOfFirst { it is CheckInState.InRange }.coerceAtLeast(0)
+            showCheckIn(demoStates[demoIndex])
+        } else {
+            binding.btnPrimary.setText(primaryTextForOpenKeo())
+        }
+        binding.btnPrimary.setOnClickListener { onPrimaryClick(it) }
+        binding.checkin.btnCheckinSecondary.setOnClickListener { it.showComingSoon() }
+    }
+
+    private fun setupToolbar(args: Bundle) {
+        val nav = findNavController()
         binding.toolbar.setNavigationOnClickListener { nav.navigateUp() }
+
+        // Mời bằng QR: kèo đang mở và mình đã ở trong kèo (thành viên nào cũng mời được)
+        binding.toolbar.menu.findItem(R.id.action_invite).isVisible =
+            keo.status == KeoStatus.OPEN && keo.myRole != MyRole.NONE
+        binding.toolbar.menu.findItem(R.id.action_demo_checkin).isVisible =
+            keo.status == KeoStatus.CHECK_IN
+
         binding.toolbar.setOnMenuItemClickListener { item ->
             when (item.itemId) {
                 R.id.action_invite -> nav.navigate(R.id.action_lobby_to_inviteQr, args)

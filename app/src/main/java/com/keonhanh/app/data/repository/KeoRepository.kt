@@ -16,34 +16,13 @@ import kotlinx.coroutines.tasks.await
 import java.util.Date
 import kotlin.random.Random
 
-/**
- * Dữ liệu kèo: keos/{keoId}. File này của Huy Hoàng.
- *
- * Phong Hào đã viết sẵn interface (để cả nhóm code theo cùng một hợp đồng) và 2 hàm đọc mà S15, S17 cần.
- * Các hàm còn `TODO(...)` là phần của Hoàng; mỗi hàm có gợi ý cách làm ngay bên trong.
- * Đọc thêm: docs/HUONG_DAN_TUAN3_MVVM.md, mục "Việc của Huy Hoàng".
- */
 interface KeoRepository {
-
-    /** S15: một kèo, phát lại mỗi khi document đổi (có người vào/ra, chủ kèo sửa); phát null nếu kèo bị xóa. Đã làm. */
     fun observeKeo(keoId: String): Flow<KeoDoc?>
-
-    /** S17: đọc một lần nhiều kèo theo id; id không còn tồn tại thì bỏ qua. Đã làm. */
     suspend fun getKeos(keoIds: List<String>): List<KeoDoc>
-
-    /** S09, S10: các kèo chưa kết thúc để hiện ở Khám phá. TODO Huy Hoàng. */
     fun observeActiveKeos(): Flow<List<KeoDoc>>
-
-    /** S12: tạo kèo và document chủ kèo, trả về keoId mới. TODO Huy Hoàng. */
     suspend fun createKeo(draft: KeoDraft, hostId: String, hostName: String): String
-
-    /** S12 ở chế độ sửa: chủ kèo đổi tên, giờ, số người... TODO Huy Hoàng. */
     suspend fun updateKeo(keoId: String, draft: KeoDraft)
-
-    /** S15 "Hủy kèo" (chỉ chủ kèo): xóa thành viên, tin nhắn rồi xóa kèo. TODO Huy Hoàng. */
     suspend fun deleteKeo(keoId: String)
-
-    /** S07: tìm kèo theo mã mời 6 ký tự; null nếu không có. TODO Huy Hoàng (Minh Khoa gọi ở tuần 4). */
     suspend fun findByInviteCode(code: String): KeoDoc?
 }
 
@@ -57,7 +36,6 @@ class FirestoreKeoRepository(
         keos.document(keoId).snapshotFlow().map { it.toKeoDoc() }
 
     override suspend fun getKeos(keoIds: List<String>): List<KeoDoc> =
-        // whereIn nhận tối đa 30 giá trị mỗi truy vấn nên chia nhỏ danh sách
         keoIds.distinct().chunked(30).flatMap { chunk ->
             keos.whereIn(FieldPath.documentId(), chunk).get().await()
                 .documents.mapNotNull { it.toKeoDoc() }

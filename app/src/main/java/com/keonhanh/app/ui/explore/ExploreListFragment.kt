@@ -7,6 +7,7 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.keonhanh.app.R
+import com.keonhanh.app.data.model.Sport
 import com.keonhanh.app.databinding.FragmentExploreListBinding
 import com.keonhanh.app.ui.common.KeoAdapter
 import com.keonhanh.app.ui.common.UiState
@@ -14,7 +15,6 @@ import com.keonhanh.app.ui.common.appViewModels
 import com.keonhanh.app.ui.common.collectWhenStarted
 import com.keonhanh.app.ui.lobby.LobbyFragment
 
-/** S10 Khám phá – danh sách (TV2). Layout: res/layout/fragment_explore_list.xml */
 class ExploreListFragment : Fragment(R.layout.fragment_explore_list) {
 
     private var _binding: FragmentExploreListBinding? = null

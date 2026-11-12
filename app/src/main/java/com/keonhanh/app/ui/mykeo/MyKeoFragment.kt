@@ -8,8 +8,6 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.tabs.TabLayout
 import com.keonhanh.app.R
-import com.keonhanh.app.data.model.MyRole
-import com.keonhanh.app.data.sample.SampleData
 import com.keonhanh.app.databinding.FragmentMyKeoBinding
 import com.keonhanh.app.ui.common.KeoAdapter
 import com.keonhanh.app.ui.common.UiState
@@ -41,9 +39,6 @@ class MyKeoFragment : Fragment(R.layout.fragment_my_keo) {
         }
         binding.rvKeo.adapter = adapter
 
-        binding.empty.tvEmptyTitle.setText(R.string.my_keo_empty_title)
-        binding.empty.tvEmptyMessage.setText(R.string.my_keo_empty_message)
-
         binding.tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
             override fun onTabSelected(tab: TabLayout.Tab) = render(viewModel.state.value)
             override fun onTabUnselected(tab: TabLayout.Tab) = Unit
@@ -51,7 +46,6 @@ class MyKeoFragment : Fragment(R.layout.fragment_my_keo) {
         })
 
         collectWhenStarted(viewModel.state) { render(it) }
-        showTab(binding.tabLayout.selectedTabPosition.coerceAtLeast(0))
     }
 
     /** Tab 0: đang tham gia · tab 1: đang làm chủ · tab 2: đã xong */
@@ -62,7 +56,6 @@ class MyKeoFragment : Fragment(R.layout.fragment_my_keo) {
                 adapter.submitList(emptyList())
                 binding.empty.root.isVisible = false
             }
-
             is UiState.Error -> {
                 adapter.submitList(emptyList())
                 binding.empty.root.isVisible = true
@@ -70,7 +63,6 @@ class MyKeoFragment : Fragment(R.layout.fragment_my_keo) {
                 binding.empty.tvEmptyTitle.setText(R.string.my_keo_error_title)
                 binding.empty.tvEmptyMessage.text = state.message.resolve(requireContext())
             }
-
             is UiState.Success -> {
                 val tab = binding.tabLayout.selectedTabPosition.coerceAtLeast(0)
                 val items = when (tab) {
@@ -91,17 +83,6 @@ class MyKeoFragment : Fragment(R.layout.fragment_my_keo) {
                 )
             }
         }
-    }
-
-    /** Tab 0: đang tham gia · tab 1: đang làm chủ · tab 2: đã xong (chưa có dữ liệu mẫu → trạng thái rỗng) */
-    private fun showTab(position: Int) {
-        val items = when (position) {
-            0 -> SampleData.keos.filter { it.myRole == MyRole.MEMBER }
-            1 -> SampleData.keos.filter { it.myRole == MyRole.HOST }
-            else -> emptyList()
-        }
-        adapter.submitList(items)
-        binding.empty.root.isVisible = items.isEmpty()
     }
 
     override fun onDestroyView() {

@@ -94,7 +94,7 @@ Mỗi hàm đã có gợi ý code ngay trong `TODO(...)`. Gọi chưa viết xon
 
 - **`memberCount` chỉ được đổi trong `MemberRepository`** (transaction cùng lúc thêm/xóa thành viên). Ở S12, `createKeo` đặt 1; sửa kèo không đụng tới trường này.
 - Luật `keos` trong `firestore.rules` đã có bản đầu (tạo, sửa, xóa). Hàm `memberCountStep` là phần Phong Hào viết cho transaction tham gia/rời, **đừng xóa**.
-- Đổi `KeoDoc` sang `Keo` để hiện thẻ kèo: `keoDoc.toKeo(members = emptyList(), myUid = uid, distanceKm = khoangCach)`. Số người trên thẻ lấy từ `memberCount` (đã sửa `KeoCardBinder`), không cần tải từng thành viên.
+- Đổi `KeoDoc` sang `Keo` để hiện thẻ kèo: `keoDoc.toKeo(members = emptyList(), myUid = uid, distanceKm = khoangCach)`. Số người trên thẻ lấy từ `memberCount` (đã sửa `KeoCardBinder`), không cần tải từng thành viên. `Keo.distanceKm` giờ là `Double?`: để `null` thì thẻ chỉ hiện tên điểm hẹn, không hiện "0,0 km".
 - Khám phá mở S15 bằng `bundleOf(LobbyFragment.ARG_KEO_ID to keo.id)` như cũ, chỉ cần id là id thật trên Firestore. **Còn mở S15 bằng id mẫu (`k1`, `k2`...) thì S15 báo "Kèo không còn tồn tại"**: bình thường, vì S15 đã đọc Firestore.
 
 ### 4.3. Thêm vào ERD 3 trường "lưu sẵn"
@@ -130,7 +130,8 @@ Ghi chú trên ERD: "lưu sẵn lúc vào kèo / lúc gửi tin".
 
 ## 6. Lưu ý cho Minh Khoa
 
-- `UserRepository.getUserProfile` dùng `document.toObject(UserProfile::class.java)`, nhưng `UserProfile` chưa có giá trị mặc định cho các trường nên Firestore không tạo được object (cần constructor rỗng): hàm luôn trả lỗi. S15 và S16 đã có đường dự phòng (lấy tên từ email, ẩn điểm uy tín chủ kèo), nhưng nên sửa `UserProfile` thành `val uid: String = ""`, `val attended: Int = 0`...
+- `UserRepository.getUserProfile` dùng `document.toObject(UserProfile::class.java)`, nhưng `UserProfile` chưa có giá trị mặc định cho các trường nên Firestore không tạo được object (cần constructor rỗng): hàm luôn trả lỗi. Đã thử trên Emulator: ghi hồ sơ được, đọc lại báo `Class ...UserProfile does not define a no-argument constructor`. S15 và S16 đã có đường dự phòng (lấy tên từ phần trước @ của email, ẩn điểm uy tín chủ kèo), nhưng nên sửa `UserProfile` thành `val uid: String = ""`, `val attended: Int = 0`...
+- Nút **Đăng nhập** ở S02 vẫn là code tuần 2 (chỉ đóng màn, chưa gọi `AuthViewModel.login`). Hiện muốn có người dùng đăng nhập thật thì phải đi qua **Đăng ký**; chưa đăng nhập mà mở S15, S17 sẽ thấy "Bạn không có quyền làm việc này" / "Bạn cần đăng nhập trước".
 - Tuần 4 ghi check-in: `members/{uid}` đã có sẵn `checkInAt`, `checkInDistanceM`, `attendance`; thêm luật `update` cho chính mình trong `firestore.rules` (đã chừa chỗ).
 
 ## 7. Cách thử S15, S16, S17
@@ -152,7 +153,32 @@ Những trạng thái sau là mới so với mockup tuần 2. Phong Hào vẽ th
 - S16: hộp thoại "Xóa tin nhắn này?" khi nhấn giữ.
 - S17: thanh tải và trạng thái rỗng riêng cho từng tab.
 
-## 9. Mở project trên máy có Android Studio mới
+## 9. Test tự động
+
+| Loại | Ở đâu | Số bài | Kiểm tra gì |
+| --- | --- | --- | --- |
+| Unit test (chạy trên máy tính) | `app/src/test` | 24 | Vòng đời kèo theo thời gian, đổi dữ liệu Firestore sang model hiển thị, đếm ngược, bảng nút S15 |
+| Test trên máy ảo + Firebase Emulator | `app/src/androidTest/.../emulator` | 39 | `MemberRepository`, `ChatRepository`, phần đọc của `KeoRepository`; `firestore.rules` (thử ghi bậy phải bị chặn); mở app thật bấm qua S15, S16, S17 |
+
+Unit test không cần gì thêm:
+
+```
+gradlew :app:testDebugUnitTest
+```
+
+Test trên máy ảo dùng **Firebase Emulator** (Auth + Firestore chạy trên máy tính, không đụng dữ liệu thật):
+
+1. Cài một lần: `npm install -g firebase-tools` (cần Node và Java 21 trên PATH).
+2. Ở thư mục gốc của repo: `firebase emulators:start --only auth,firestore --project <project_id>`.
+   `<project_id>` phải trùng `project_id` trong `app/google-services.json` (file giả dùng để build thử có id `demo-keonhanh`). Xem dữ liệu ở http://localhost:4000.
+3. Mở một máy ảo Android (không dùng máy thật: test nối tới `10.0.2.2`).
+4. `gradlew :app:connectedDebugAndroidTest`, hoặc trong Android Studio chuột phải thư mục `emulator` → Run.
+
+Emulator nạp luật từ `firestore.rules` và tự nạp lại khi sửa file, nên sửa luật xong chỉ cần chạy lại test.
+Emulator **không** đòi index: index cho "Kèo của tôi" (mục 5) vẫn phải tạo trên Firebase thật.
+`app/src/debug/` chỉ cho bản debug nối HTTP thường tới `10.0.2.2` và `localhost` (địa chỉ của emulator).
+
+## 10. Mở project trên máy có Android Studio mới
 
 Android Studio bản mới dùng JDK 25, mà Gradle 8.14 của project chưa chạy được trên JDK 25 (báo lỗi chỉ có dòng `25.0.2`).
 `app/build.gradle.kts` lại đòi đúng JDK 17 (`jvmToolchain(17)`).

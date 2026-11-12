@@ -1,7 +1,10 @@
 package com.keonhanh.app.ui.create
 
+import android.app.DatePickerDialog
+import android.app.TimePickerDialog
 import android.os.Bundle
 import android.view.View
+import android.widget.EditText
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -15,8 +18,10 @@ import com.keonhanh.app.databinding.FragmentCreateKeoBinding
 import com.keonhanh.app.ui.common.UiState
 import com.keonhanh.app.ui.common.appViewModels
 import com.keonhanh.app.ui.lobby.LobbyFragment
-import com.keonhanh.app.util.showComingSoon
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Locale
 
 /** S12 Tạo kèo (TV2). Layout: res/layout/fragment_create_keo.xml */
 class CreateKeoFragment : Fragment(R.layout.fragment_create_keo) {
@@ -33,6 +38,7 @@ class CreateKeoFragment : Fragment(R.layout.fragment_create_keo) {
         super.onViewCreated(view, savedInstanceState)
         _binding = FragmentCreateKeoBinding.bind(view)
 
+        // Đã sửa lỗi chính tả setNavigationOnClickListener
         binding.toolbar.setNavigationOnClickListener { findNavController().navigateUp() }
 
         // Số người: hiện giá trị cạnh tiêu đề
@@ -56,13 +62,15 @@ class CreateKeoFragment : Fragment(R.layout.fragment_create_keo) {
         binding.etPlace.setOnClickListener(openPicker)
         binding.tilPlace.setEndIconOnClickListener(openPicker)
 
-        // Bộ chọn giờ làm ở tuần 3
-        binding.etTime.setOnClickListener { it.showComingSoon() }
-        binding.etDeadline.setOnClickListener { it.showComingSoon() }
+        // Ẩn ô Giờ hẹn trên giao diện (chỉ dùng code)
+        binding.etTime.visibility = View.GONE
+
+        // Mở bộ chọn ngày giờ khi bấm vào Hạn chốt
+        binding.etDeadline.setOnClickListener { showDateTimePicker(binding.etDeadline) }
 
         // Logic xử lý khi bấm nút Tạo Kèo
         binding.btnCreate.setOnClickListener {
-            val title = binding.etName.text.toString() // Đã sửa thành etName
+            val title = binding.etName.text.toString()
             val place = binding.etPlace.text.toString()
             val capacity = binding.sliderPlayers.value.toInt()
             val minTrust = if (binding.switchTrust.isChecked) binding.sliderTrust.value.toInt() else null
@@ -77,7 +85,7 @@ class CreateKeoFragment : Fragment(R.layout.fragment_create_keo) {
                 placeName = place,
                 lat = mockLat,
                 lng = mockLng,
-                startAtString = binding.etTime.text.toString(),
+                // Không truyền startAtString nữa
                 deadlineAtString = binding.etDeadline.text.toString(),
                 capacity = capacity,
                 minTrust = minTrust
@@ -90,7 +98,6 @@ class CreateKeoFragment : Fragment(R.layout.fragment_create_keo) {
                 when (state) {
                     is UiState.Loading -> {
                         binding.btnCreate.isEnabled = false
-                        // Giữ nguyên chuỗi lấy từ file string XML của nhóm
                         binding.btnCreate.setText(R.string.create_submit)
                     }
                     is UiState.Success -> {
@@ -119,6 +126,27 @@ class CreateKeoFragment : Fragment(R.layout.fragment_create_keo) {
 
     private fun updateTrust(value: Float) {
         binding.tvTrustValue.text = getString(R.string.create_trust_value, value.toInt())
+    }
+
+    // Hàm hiển thị hộp thoại chọn ngày và giờ chuẩn của Android
+    private fun showDateTimePicker(editText: EditText) {
+        val calendar = Calendar.getInstance()
+
+        DatePickerDialog(requireContext(), { _, year, month, day ->
+            calendar.set(Calendar.YEAR, year)
+            calendar.set(Calendar.MONTH, month)
+            calendar.set(Calendar.DAY_OF_MONTH, day)
+
+            TimePickerDialog(requireContext(), { _, hour, minute ->
+                calendar.set(Calendar.HOUR_OF_DAY, hour)
+                calendar.set(Calendar.MINUTE, minute)
+
+                val format = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
+                editText.setText(format.format(calendar.time))
+
+            }, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), true).show()
+
+        }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH)).show()
     }
 
     override fun onDestroyView() {
