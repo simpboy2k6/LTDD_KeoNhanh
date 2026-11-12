@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Menu thanh tiêu đề S15.
+  - Mời bằng mã QR: hiện khi kèo đang mở và mình đã là thành viên hoặc chủ kèo.
+  - Đổi trạng thái check-in (demo): chỉ để quay video tuần 2, xóa ở tuần 4.
+-->
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/action_invite"
+        android:icon="@drawable/ic_qr_code_2_24"
+        android:title="@string/menu_invite"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/action_demo_checkin"
+        android:title="@string/menu_demo_checkin"
+        app:showAsAction="never" />
+</menu>

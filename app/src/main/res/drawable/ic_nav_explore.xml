@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Tab đang chọn: icon tô đặc; tab thường: icon nét -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@drawable/ic_explore_fill_24" android:state_checked="true" />
+    <item android:drawable="@drawable/ic_explore_24" />
+</selector>

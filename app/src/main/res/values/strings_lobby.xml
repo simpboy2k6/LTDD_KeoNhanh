@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Chuỗi của TV3: Phòng chờ (S15), Chat (S16, S18), Kèo của tôi (S17) -->
+<resources>
+    <!-- S15 Chi tiết kèo / phòng chờ -->
+    <string name="lobby_title">Chi tiết kèo</string>
+    <string name="lobby_host_line">%1$s · Chủ kèo: %2$s (uy tín %3$d%%)</string>
+    <string name="lobby_countdown_label">Chốt kèo sau</string>
+    <string name="lobby_members">Thành viên</string>
+    <string name="lobby_members_count">%1$d/%2$d</string>
+    <string name="lobby_min_trust">Yêu cầu uy tín ≥ %1$d%%</string>
+    <string name="lobby_chat_preview">Chat phòng chờ</string>
+    <string name="lobby_join">Tham gia kèo</string>
+    <string name="lobby_request_join">Xin vào</string>
+    <string name="lobby_leave">Rời kèo</string>
+    <string name="lobby_cancel">Hủy kèo</string>
+    <string name="lobby_checked_in_count">%1$d/%2$d đã check-in</string>
+    <string name="menu_invite">Mời bằng mã QR</string>
+    <string name="menu_demo_checkin">Đổi trạng thái check-in (demo)</string>
+    <string name="cd_open_chat">Mở chat phòng chờ</string>
+
+    <!-- S16 Chat phòng chờ -->
+    <string name="chat_members_subtitle">%1$d thành viên</string>
+    <string name="chat_sender_time">%1$s · %2$s</string>
+    <string name="chat_hint">Nhắn cho cả phòng…</string>
+    <string name="cd_send">Gửi tin nhắn</string>
+
+    <!-- S17 Kèo của tôi -->
+    <string name="my_keo_title">Kèo của tôi</string>
+    <string name="my_keo_tab_joined">Đang tham gia</string>
+    <string name="my_keo_tab_hosting">Đang làm chủ</string>
+    <string name="my_keo_tab_done">Đã xong</string>
+    <string name="my_keo_empty_title">Chưa có kèo nào ở đây</string>
+    <string name="my_keo_empty_message">Kèo đã kết thúc sẽ hiện ở tab này</string>
+
+    <!-- S18 Danh sách chat -->
+    <string name="chat_list_title">Chat</string>
+</resources>

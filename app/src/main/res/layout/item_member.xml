@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Một ô thành viên trong lưới 4 cột (S15) và lưới đã check-in (S06).
+  Ô trống: nền vòng nét đứt + dấu "+" (S15) hoặc "?" (S06), gán trong MemberAdapter.
+-->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingVertical="@dimen/space_4">
+
+    <FrameLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal">
+
+        <TextView
+            android:id="@+id/tv_avatar"
+            style="@style/Widget.KeoNhanh.Avatar"
+            android:layout_width="@dimen/avatar_md"
+            android:layout_height="@dimen/avatar_md"
+            tools:text="A" />
+
+        <!-- Dấu tích "đã check-in" ở góc dưới phải (chỉ dùng ở S06) -->
+        <ImageView
+            android:id="@+id/iv_checked"
+            android:layout_width="@dimen/check_badge"
+            android:layout_height="@dimen/check_badge"
+            android:layout_gravity="bottom|end"
+            android:background="@drawable/bg_avatar"
+            android:importantForAccessibility="no"
+            android:src="@drawable/ic_check_circle_24"
+            android:visibility="gone"
+            app:tint="@color/kn_green_text"
+            tools:visibility="visible" />
+    </FrameLayout>
+</FrameLayout>

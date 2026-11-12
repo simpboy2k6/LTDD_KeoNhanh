@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Vòng bán kính check-in quanh ghim điểm hẹn ở S13 -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="oval">
+    <solid android:color="@color/kn_green_veil" />
+    <stroke android:width="2dp" android:color="@color/kn_green" />
+</shape>

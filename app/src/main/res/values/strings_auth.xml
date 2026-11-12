@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Chuỗi của TV1: Đăng nhập (S02), Hồ sơ (S05), Mã mời (S06), Quét mã mời (S07)
+  và thẻ check-in theo khoảng cách (view_checkin_card.xml, nhúng vào S15).
+-->
+<resources>
+    <!-- S02 Đăng nhập -->
+    <string name="login_tagline">Ghép kèo thể thao và board game quanh trường</string>
+    <string name="login_email_hint">Email sinh viên</string>
+    <string name="login_email_helper">Dùng email do trường cấp</string>
+    <string name="login_password_hint">Mật khẩu</string>
+    <string name="login_button">Đăng nhập</string>
+    <string name="login_forgot">Quên mật khẩu?</string>
+    <string name="login_no_account">Chưa có tài khoản?</string>
+    <string name="login_register">Đăng ký</string>
+
+    <!-- S05 Hồ sơ -->
+    <string name="profile_title">Hồ sơ</string>
+    <string name="profile_trust_label">Điểm uy tín</string>
+    <string name="profile_trust_value">%1$d%%</string>
+    <string name="profile_trust_detail">Đã đến %1$d/%2$d kèo đã nhận lời</string>
+    <string name="profile_stat_attended">Đã đến</string>
+    <string name="profile_stat_no_show">Bùng kèo</string>
+    <string name="profile_stat_hosted">Làm chủ</string>
+    <string name="profile_menu_places">Vị trí quan tâm và thông báo</string>
+    <string name="profile_menu_history">Lịch sử kèo</string>
+    <string name="profile_logout">Đăng xuất</string>
+
+    <!-- S06 Mã mời vào kèo -->
+    <string name="invite_title">Mời vào kèo</string>
+    <string name="invite_summary">%1$d/%2$d người · %3$s</string>
+    <string name="invite_instruction">Bạn bè mở KèoNhanh, bấm biểu tượng quét QR ở Khám phá rồi quét mã này</string>
+    <string name="invite_code_label">Mã mời</string>
+    <string name="invite_copy">Sao chép</string>
+    <string name="invite_copied">Đã sao chép mã mời</string>
+    <string name="invite_share">Chia sẻ link mời</string>
+    <string name="invite_link" translatable="false">keonhanh://moi/%1$s</string>
+    <string name="invite_share_text">Vào kèo \"%1$s\" trên KèoNhanh: %2$s</string>
+    <string name="invite_trust_note">Kèo có ngưỡng uy tín ≥ %1$d%%: người vào bằng mã vẫn phải xin vào</string>
+    <string name="cd_invite_qr">Mã QR mời vào kèo %1$s</string>
+
+    <!-- S07 Quét mã mời -->
+    <string name="scan_title">Quét mã mời</string>
+    <string name="scan_camera_placeholder">Vùng camera\n(tuần 4 dùng Code Scanner)\nChạm để giả lập quét</string>
+    <string name="scan_hint">Hướng camera vào mã QR bạn bè gửi</string>
+    <string name="scan_or_enter">Hoặc nhập mã mời</string>
+    <string name="scan_code_hint">Mã mời (6 ký tự)</string>
+    <string name="scan_open">Mở kèo</string>
+    <string name="scan_code_not_found">Không tìm thấy kèo với mã này</string>
+    <string name="cd_scan_area">Vùng quét mã QR</string>
+
+    <!-- Thẻ check-in theo khoảng cách (trong S15) -->
+    <string name="checkin_distance_value">%1$d m</string>
+    <string name="checkin_title_not_yet">Chưa tới giờ check-in</string>
+    <string name="checkin_detail_not_yet">Check-in mở trong khung %1$s (giờ hẹn ± 15 phút)</string>
+    <string name="checkin_title_far">Bạn còn ở xa điểm hẹn</string>
+    <string name="checkin_detail_far">Cần vào trong %1$d m quanh điểm hẹn để check-in</string>
+    <string name="checkin_title_poor_gps">GPS chưa đủ chính xác</string>
+    <string name="checkin_detail_poor_gps">Sai số đang là ±%1$d m, cần dưới %2$d m. Ra chỗ thoáng rồi đo lại.</string>
+    <string name="checkin_title_in_range">Bạn đã ở điểm hẹn</string>
+    <string name="checkin_detail_in_range">Sai số GPS ±%1$d m · cần trong %2$d m</string>
+    <string name="checkin_title_no_permission">Cần quyền vị trí chính xác</string>
+    <string name="checkin_detail_no_permission">Check-in dùng GPS để đo khoảng cách từ bạn tới điểm hẹn</string>
+    <string name="checkin_title_done">Đã check-in lúc %1$s</string>
+    <string name="checkin_detail_done">Cách điểm hẹn %1$d m khi check-in</string>
+    <string name="checkin_title_missed">Đã quá giờ check-in</string>
+    <string name="checkin_detail_missed">Lần này được tính là vắng mặt</string>
+    <string name="checkin_action">Check-in</string>
+    <string name="checkin_action_done">Đã check-in</string>
+    <string name="checkin_action_grant">Cấp quyền vị trí</string>
+    <string name="checkin_action_closed">Ngoài giờ check-in</string>
+    <string name="checkin_open_map">Mở bản đồ</string>
+    <string name="checkin_measure_again">Đo lại</string>
+    <string name="checkin_success">Check-in thành công</string>
+</resources>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Ô chỗ trống trong phòng chờ: vòng tròn viền nét đứt -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="oval">
+    <solid android:color="@android:color/transparent" />
+    <stroke
+        android:width="2dp"
+        android:color="@color/kn_outline"
+        android:dashWidth="4dp"
+        android:dashGap="4dp" />
+</shape>

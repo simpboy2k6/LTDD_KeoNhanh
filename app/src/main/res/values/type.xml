@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  8 kiểu chữ theo Material 3 (mục 4 tài liệu tuần 2). Cỡ chữ / chiều cao dòng lấy từ M3,
+  ở đây chỉ đổi font sang Be Vietnam Pro. Layout dùng: android:textAppearance="?attr/textAppearanceTitleMedium"
+-->
+<resources>
+    <style name="TextAppearance.KeoNhanh.DisplaySmall" parent="TextAppearance.Material3.DisplaySmall">
+        <item name="fontFamily">@font/be_vietnam_pro_bold</item>
+        <item name="android:fontFamily">@font/be_vietnam_pro_bold</item>
+    </style>
+
+    <style name="TextAppearance.KeoNhanh.HeadlineSmall" parent="TextAppearance.Material3.HeadlineSmall">
+        <item name="fontFamily">@font/be_vietnam_pro_semibold</item>
+        <item name="android:fontFamily">@font/be_vietnam_pro_semibold</item>
+    </style>
+
+    <style name="TextAppearance.KeoNhanh.TitleLarge" parent="TextAppearance.Material3.TitleLarge">
+        <item name="fontFamily">@font/be_vietnam_pro_semibold</item>
+        <item name="android:fontFamily">@font/be_vietnam_pro_semibold</item>
+    </style>
+
+    <style name="TextAppearance.KeoNhanh.TitleMedium" parent="TextAppearance.Material3.TitleMedium">
+        <item name="fontFamily">@font/be_vietnam_pro_semibold</item>
+        <item name="android:fontFamily">@font/be_vietnam_pro_semibold</item>
+    </style>
+
+    <style name="TextAppearance.KeoNhanh.BodyLarge" parent="TextAppearance.Material3.BodyLarge">
+        <item name="fontFamily">@font/be_vietnam_pro_regular</item>
+        <item name="android:fontFamily">@font/be_vietnam_pro_regular</item>
+    </style>
+
+    <style name="TextAppearance.KeoNhanh.BodyMedium" parent="TextAppearance.Material3.BodyMedium">
+        <item name="fontFamily">@font/be_vietnam_pro_regular</item>
+        <item name="android:fontFamily">@font/be_vietnam_pro_regular</item>
+    </style>
+
+    <style name="TextAppearance.KeoNhanh.LabelLarge" parent="TextAppearance.Material3.LabelLarge">
+        <item name="fontFamily">@font/be_vietnam_pro_semibold</item>
+        <item name="android:fontFamily">@font/be_vietnam_pro_semibold</item>
+    </style>
+
+    <style name="TextAppearance.KeoNhanh.LabelMedium" parent="TextAppearance.Material3.LabelMedium">
+        <item name="fontFamily">@font/be_vietnam_pro_medium</item>
+        <item name="android:fontFamily">@font/be_vietnam_pro_medium</item>
+    </style>
+
+    <!--
+      Đồng hồ đếm ngược: Be Vietnam Pro có chữ số rộng hẹp khác nhau và không có tính năng tnum,
+      nên số sẽ "nhảy" mỗi giây. Riêng đồng hồ dùng sans-serif (Roboto), chữ số đều chiều rộng.
+    -->
+    <style name="TextAppearance.KeoNhanh.Countdown" parent="TextAppearance.Material3.DisplaySmall">
+        <item name="fontFamily">sans-serif</item>
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+</resources>

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Ảnh bản đồ GIỮ CHỖ cho S09 ở tuần 2 (layout tĩnh).
+  Tuần 3: TV2 thay ImageView bằng org.osmdroid.views.MapView, vẽ marker thật theo môn.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="360dp"
+    android:height="640dp"
+    android:viewportWidth="360"
+    android:viewportHeight="640">
+    <!-- Nền đất -->
+    <path android:fillColor="@color/kn_map_land" android:pathData="M0,0h360v640h-360z" />
+    <!-- Công viên -->
+    <path android:fillColor="@color/kn_map_park" android:pathData="M150,250h90a12,12 0 0 1 12,12v80a12,12 0 0 1 -12,12h-90a12,12 0 0 1 -12,-12v-80a12,12 0 0 1 12,-12z" />
+    <!-- Sông -->
+    <path android:fillColor="@color/kn_map_water" android:pathData="M0,450 C80,420 140,470 220,455 C280,445 320,420 360,430 L360,490 C320,480 280,505 220,515 C140,528 80,480 0,505 Z" />
+    <!-- Đường -->
+    <path android:strokeColor="@color/white" android:strokeWidth="14" android:pathData="M0,210 L360,200" />
+    <path android:strokeColor="@color/white" android:strokeWidth="12" android:pathData="M110,0 L110,640" />
+    <path android:strokeColor="@color/white" android:strokeWidth="12" android:pathData="M270,0 L270,640" />
+    <path android:strokeColor="@color/white" android:strokeWidth="8" android:pathData="M0,380 L110,375" />
+    <!-- Vùng bán kính 3 km quanh người dùng -->
+    <path
+        android:fillAlpha="0.14"
+        android:fillColor="@color/kn_green"
+        android:strokeWidth="2"
+        android:strokeColor="@color/kn_green"
+        android:pathData="M60,330 a130,130 0 1,0 260,0 a130,130 0 1,0 -260,0 z" />
+    <!-- Marker bóng đá (trong bán kính) -->
+    <path android:fillColor="@color/kn_green" android:pathData="M130,302 C124,292 114,286 114,276 A16,16 0 1,1 146,276 C146,286 136,292 130,302 Z" />
+    <path android:fillColor="@color/white" android:pathData="M123,276 a7,7 0 1,0 14,0 a7,7 0 1,0 -14,0 z" />
+    <!-- Marker board game -->
+    <path android:fillColor="@color/kn_purple" android:pathData="M250,318 C244,308 234,302 234,292 A16,16 0 1,1 266,292 C266,302 256,308 250,318 Z" />
+    <path android:fillColor="@color/white" android:pathData="M243,292 a7,7 0 1,0 14,0 a7,7 0 1,0 -14,0 z" />
+    <!-- Marker cầu lông -->
+    <path android:fillColor="@color/kn_orange" android:pathData="M200,424 C194,414 184,408 184,398 A16,16 0 1,1 216,398 C216,408 206,414 200,424 Z" />
+    <path android:fillColor="@color/white" android:pathData="M193,398 a7,7 0 1,0 14,0 a7,7 0 1,0 -14,0 z" />
+    <!-- Marker ngoài bán kính (mờ) -->
+    <path android:fillAlpha="0.45" android:fillColor="@color/kn_green" android:pathData="M326,168 C320,158 310,152 310,142 A16,16 0 1,1 342,142 C342,152 332,158 326,168 Z" />
+    <!-- Vị trí người dùng -->
+    <path android:fillColor="@color/white" android:pathData="M176,330 a14,14 0 1,0 28,0 a14,14 0 1,0 -28,0 z" />
+    <path android:fillColor="@color/kn_blue" android:pathData="M181,330 a9,9 0 1,0 18,0 a9,9 0 1,0 -18,0 z" />
+</vector>

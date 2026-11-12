@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Chuỗi dùng chung (TV3 giữ). Mỗi người có file chuỗi riêng để tránh conflict khi merge:
+  strings_auth.xml (TV1) · strings_explore.xml (TV2) · strings_lobby.xml (TV3)
+-->
+<resources>
+    <string name="app_name">KèoNhanh</string>
+
+    <!-- Bottom nav -->
+    <string name="nav_explore">Khám phá</string>
+    <string name="nav_my_keo">Kèo của tôi</string>
+    <string name="nav_chat">Chat</string>
+    <string name="nav_profile">Hồ sơ</string>
+
+    <!-- Môn -->
+    <string name="sport_all">Tất cả</string>
+    <string name="sport_soccer">Bóng đá</string>
+    <string name="sport_badminton">Cầu lông</string>
+    <string name="sport_board_game">Board game</string>
+
+    <!-- Hành động chung -->
+    <string name="action_back">Quay lại</string>
+    <string name="action_close">Đóng</string>
+    <string name="action_share">Chia sẻ</string>
+    <string name="coming_soon">Phần này làm ở các tuần sau</string>
+
+    <!-- Định dạng dùng chung -->
+    <string name="avatar_more">+%1$d</string>
+    <string name="keo_place_distance">%1$s · %2$s km</string>
+    <string name="keo_slots">%1$d/%2$d người</string>
+    <string name="keo_deadline">Chốt sau %1$s</string>
+    <string name="keo_min_trust">Uy tín ≥ %1$d%%</string>
+    <string name="keo_checking_in">Đang check-in</string>
+    <string name="slot_empty" translatable="false">+</string>
+</resources>
