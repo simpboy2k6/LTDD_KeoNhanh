@@ -10,3 +10,6 @@
 .cxx/
 .kotlin/
 google-services.json
+# Log của Firebase Emulator (firebase emulators:start)
+*-debug.log
+.firebase/

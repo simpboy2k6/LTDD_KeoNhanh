@@ -51,6 +51,7 @@ class LobbyFragment : Fragment(R.layout.fragment_lobby) {
     }
 
     private var memberAdapter: MemberAdapter? = null
+    private var snackbar: Snackbar? = null
     private var lastUi: LobbyUi? = null
     private var primaryEnabled = false
 
@@ -78,11 +79,11 @@ class LobbyFragment : Fragment(R.layout.fragment_lobby) {
             true
         }
 
-        val openChat = View.OnClickListener { clicked ->
+        val openChat = View.OnClickListener {
             if (lastUi?.canOpenChat == true) {
                 nav.navigate(R.id.action_lobby_to_lobbyChat, args)
             } else {
-                Snackbar.make(clicked, R.string.lobby_chat_locked, Snackbar.LENGTH_SHORT).show()
+                showMessage(getString(R.string.lobby_chat_locked))
             }
         }
         binding.cardChatPreview.setOnClickListener(openChat)
@@ -97,10 +98,17 @@ class LobbyFragment : Fragment(R.layout.fragment_lobby) {
         }
         collectWhenStarted(viewModel.events) { event ->
             when (event) {
-                is LobbyEvent.ShowMessage ->
-                    Snackbar.make(binding.root, event.text.resolve(requireContext()), Snackbar.LENGTH_SHORT).show()
+                is LobbyEvent.ShowMessage -> showMessage(event.text.resolve(requireContext()))
                 LobbyEvent.Closed -> nav.navigateUp()
             }
+        }
+    }
+
+    /** Thông báo ngắn, đặt ngay trên thanh nút để không che nút chính; tự tắt khi rời màn (không đè sang S16). */
+    private fun showMessage(text: String) {
+        snackbar = Snackbar.make(binding.root, text, Snackbar.LENGTH_SHORT).apply {
+            if (binding.barActions.isVisible) anchorView = binding.barActions
+            show()
         }
     }
 
@@ -254,7 +262,7 @@ class LobbyFragment : Fragment(R.layout.fragment_lobby) {
             is CheckInState.InRange -> {
                 // Tuần 4 (Minh Khoa): ghi checkInAt, checkInDistanceM vào members/{uid} trên Firestore
                 showCheckIn(CheckInState.Done(time = "16:52", distanceM = state.distanceM))
-                Snackbar.make(button, R.string.checkin_success, Snackbar.LENGTH_SHORT).show()
+                showMessage(getString(R.string.checkin_success))
             }
             // Tuần 4: xin quyền ACCESS_FINE_LOCATION
             else -> button.showComingSoon()
@@ -263,6 +271,8 @@ class LobbyFragment : Fragment(R.layout.fragment_lobby) {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        snackbar?.dismiss()
+        snackbar = null
         memberAdapter = null
         _binding = null
     }

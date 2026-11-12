@@ -20,7 +20,10 @@ fun ItemKeoBinding.bind(keo: Keo, showViewButton: Boolean = false) {
     ivSport.backgroundTintList = ContextCompat.getColorStateList(ctx, keo.sport.color)
 
     tvTitle.text = keo.title
-    tvSubtitle.text = ctx.getString(R.string.keo_place_distance, keo.place, formatKm(keo.distanceKm))
+    // Chưa đo khoảng cách (Kèo của tôi) thì chỉ hiện tên điểm hẹn, không hiện "0,0 km"
+    tvSubtitle.text = keo.distanceKm
+        ?.let { ctx.getString(R.string.keo_place_distance, keo.place, formatKm(it)) }
+        ?: keo.place
     tvSlots.text = ctx.getString(R.string.keo_slots, keo.memberCount, keo.maxSlots)
     tvDeadline.text = if (keo.status == KeoStatus.CHECK_IN) {
         ctx.getString(R.string.keo_checking_in)
@@ -35,7 +38,8 @@ fun ItemKeoBinding.bind(keo: Keo, showViewButton: Boolean = false) {
         view.isVisible = member != null
         if (member != null) view.bindAvatar(member.name, member.id)
     }
-    val extra = keo.members.size - avatarViews.size
+    // Tính theo memberCount: danh sách không tải đủ thành viên (Kèo của tôi chỉ có dòng của mình) vẫn hiện đúng "+n"
+    val extra = keo.memberCount - keo.members.size.coerceAtMost(avatarViews.size)
     tvAvatarMore.isVisible = extra > 0
     tvAvatarMore.text = ctx.getString(R.string.avatar_more, extra)
 

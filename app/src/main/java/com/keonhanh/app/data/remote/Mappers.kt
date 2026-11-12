@@ -112,13 +112,14 @@ fun newMemberMap(uid: String, displayName: String, role: MemberRole, state: Memb
  * @param members thành viên của kèo (cả JOINED và REQUESTED); chỉ JOINED được hiện trong lưới
  * @param myUid uid người đang dùng app, để biết mình là chủ kèo, thành viên hay người ngoài
  * @param hostTrust điểm uy tín của chủ kèo nếu đã đọc được hồ sơ; null thì để 0 (màn hình tự ẩn)
- * @param distanceKm khoảng cách tới điểm hẹn; S09/S10 (Huy Hoàng) tính bằng Haversine, S15/S17 chưa cần
+ * @param distanceKm khoảng cách tới điểm hẹn; S09/S10 (Huy Hoàng) tính bằng Haversine rồi truyền vào,
+ *   S15/S17 không đo nên để null (thẻ kèo khi đó chỉ hiện tên điểm hẹn)
  */
 fun KeoDoc.toKeo(
     members: List<MemberDoc>,
     myUid: String?,
     hostTrust: Int? = null,
-    distanceKm: Double = 0.0,
+    distanceKm: Double? = null,
     nowMillis: Long = System.currentTimeMillis(),
 ): Keo {
     val joined = members
