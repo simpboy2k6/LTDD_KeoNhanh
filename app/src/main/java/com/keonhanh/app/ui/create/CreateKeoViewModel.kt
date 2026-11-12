@@ -11,6 +11,10 @@ import com.keonhanh.app.ui.common.toUiText
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Date
+import java.util.Locale
 
 class CreateKeoViewModel(
     private val keoRepository: KeoRepository,
@@ -26,7 +30,6 @@ class CreateKeoViewModel(
         placeName: String,
         lat: Double,
         lng: Double,
-        startAtString: String,
         deadlineAtString: String,
         capacity: Int,
         minTrust: Int?
@@ -34,13 +37,31 @@ class CreateKeoViewModel(
         viewModelScope.launch {
             _createState.value = UiState.Loading
             try {
-                // Đã sửa thành authRepository.currentUser
+                if (deadlineAtString.isBlank()) {
+                    throw Exception("Vui lòng chọn hạn chốt")
+                }
+
                 val user = authRepository.currentUser ?: throw Exception("Chưa đăng nhập")
                 val hostId = user.uid
                 val hostName = user.displayName ?: "Unknown"
 
-                val startAt = com.google.firebase.Timestamp.now()
-                val deadlineAt = com.google.firebase.Timestamp.now()
+                // Parse hạn chốt
+                val dateFormat = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
+                val deadlineDate = dateFormat.parse(deadlineAtString) ?: throw Exception("Sai định dạng thời gian")
+
+                // Kiểm tra hạn chốt phải lớn hơn giờ hiện tại
+                if (deadlineDate.before(Date())) {
+                    throw Exception("Hạn chốt phải nằm trong tương lai")
+                }
+
+                // Tự động tính Giờ hẹn (startAt) = Hạn chốt (deadlineAt) + 1 tiếng
+                val calendar = Calendar.getInstance()
+                calendar.time = deadlineDate
+                calendar.add(Calendar.HOUR_OF_DAY, 1)
+                val startDate = calendar.time
+
+                val startTimestamp = com.google.firebase.Timestamp(startDate)
+                val deadlineTimestamp = com.google.firebase.Timestamp(deadlineDate)
 
                 val draft = KeoDraft(
                     title = title,
@@ -48,8 +69,8 @@ class CreateKeoViewModel(
                     placeName = placeName,
                     lat = lat,
                     lng = lng,
-                    startAt = com.google.firebase.Timestamp.now(),     // Đổi từ tham số String sang Timestamp
-                    deadlineAt = com.google.firebase.Timestamp.now(),  // Đổi từ tham số String sang Timestamp
+                    startAt = startTimestamp,
+                    deadlineAt = deadlineTimestamp,
                     capacity = capacity,
                     minTrust = minTrust
                 )

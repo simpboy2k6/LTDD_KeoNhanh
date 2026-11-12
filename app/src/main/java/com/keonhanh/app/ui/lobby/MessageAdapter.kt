@@ -11,8 +11,13 @@ import com.keonhanh.app.databinding.ItemMessageMeBinding
 import com.keonhanh.app.databinding.ItemMessageOtherBinding
 import com.keonhanh.app.util.bindAvatar
 
-/** Tin nhắn ở S16: 2 kiểu dòng, của mình (item_message_me) và của người khác (item_message_other). */
-class MessageAdapter : ListAdapter<Message, RecyclerView.ViewHolder>(DiffCallback) {
+/**
+ * Tin nhắn ở S16: 2 kiểu dòng, của mình (item_message_me) và của người khác (item_message_other).
+ * @param onLongClickMine nhấn giữ tin của mình (để xóa); tin người khác không nhấn giữ được
+ */
+class MessageAdapter(
+    private val onLongClickMine: (Message) -> Unit = {},
+) : ListAdapter<Message, RecyclerView.ViewHolder>(DiffCallback) {
 
     class MeHolder(val binding: ItemMessageMeBinding) : RecyclerView.ViewHolder(binding.root)
     class OtherHolder(val binding: ItemMessageOtherBinding) : RecyclerView.ViewHolder(binding.root)
@@ -35,6 +40,10 @@ class MessageAdapter : ListAdapter<Message, RecyclerView.ViewHolder>(DiffCallbac
             is MeHolder -> {
                 holder.binding.tvMessage.text = message.text
                 holder.binding.tvTime.text = message.time
+                holder.binding.root.setOnLongClickListener {
+                    onLongClickMine(message)
+                    true
+                }
             }
             is OtherHolder -> {
                 val ctx = holder.binding.root.context
