@@ -25,13 +25,13 @@ object SampleData {
     val me = Member("me", "Minh Anh")
 
     val currentUser = UserProfile(
+        uid = "u1",
         name = "Nguyễn Minh Anh",
         email = "minhanh@sv.truong.edu.vn",
         attended = 9,
         committed = 10,
         lateCancels = 0,
         hosted = 3,
-        uid = "1"
     )
 
     /** Địa điểm trả về từ S13 Chọn điểm hẹn ở tuần 2. */

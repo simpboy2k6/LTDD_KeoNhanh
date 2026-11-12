@@ -12,6 +12,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.keonhanh.app.R
 import com.keonhanh.app.data.model.CheckInState
+import com.keonhanh.app.data.model.Keo
 import com.keonhanh.app.data.model.KeoStatus
 import com.keonhanh.app.data.model.Member
 import com.keonhanh.app.data.model.MyRole
@@ -23,6 +24,7 @@ import com.keonhanh.app.ui.common.UiState
 import com.keonhanh.app.ui.common.appViewModels
 import com.keonhanh.app.ui.common.collectWhenStarted
 import com.keonhanh.app.util.bindAvatar
+import com.keonhanh.app.util.formatKm
 import com.keonhanh.app.util.showComingSoon
 
 /**
@@ -49,12 +51,14 @@ class LobbyFragment : Fragment(R.layout.fragment_lobby) {
             userRepository = container.userRepository,
         )
     }
+    private lateinit var keo: Keo
 
     private var memberAdapter: MemberAdapter? = null
     private var lastUi: LobbyUi? = null
     private var primaryEnabled = false
 
     /** Thẻ check-in (Minh Khoa): tuần 3 vẫn duyệt 7 trạng thái bằng menu demo, tuần 4 tính từ GPS. */
+    /** Tuần 2: duyệt lần lượt 7 trạng thái thẻ check-in bằng menu demo. Tuần 4: tính từ GPS. */
     private var demoStates: List<CheckInState> = emptyList()
     private var demoIndex = 0
     private var checkInState: CheckInState? = null

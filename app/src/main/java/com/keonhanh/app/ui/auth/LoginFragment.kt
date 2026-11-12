@@ -47,6 +47,8 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
             val pass = binding.etPassword.text.toString()
 
             viewModel.login(email,pass);
+            // Tuần 3: kiểm tra email trường + FirebaseAuth.signInWithEmailAndPassword rồi mới quay lại
+            findNavController().popBackStack()
         }
         binding.btnRegister.setOnClickListener {
             findNavController().navigate(R.id.action_login_to_register)

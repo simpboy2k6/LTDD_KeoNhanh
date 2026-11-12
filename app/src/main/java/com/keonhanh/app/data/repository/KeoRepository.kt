@@ -1,15 +1,20 @@
 package com.keonhanh.app.data.repository
 
+import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FieldPath
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.keonhanh.app.data.remote.FirestorePaths
 import com.keonhanh.app.data.remote.KeoDoc
 import com.keonhanh.app.data.remote.KeoDraft
 import com.keonhanh.app.data.remote.snapshotFlow
 import com.keonhanh.app.data.remote.toKeoDoc
+import com.keonhanh.app.data.remote.toNewKeoMap
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.tasks.await
+import java.util.Date
+import kotlin.random.Random
 
 /**
  * Dữ liệu kèo: keos/{keoId}. File này của Huy Hoàng.
@@ -58,67 +63,79 @@ class FirestoreKeoRepository(
                 .documents.mapNotNull { it.toKeoDoc() }
         }
 
-    override fun observeActiveKeos(): Flow<List<KeoDoc>> = TODO(
-        """
-        Huy Hoàng: truy vấn các kèo chưa kết thúc rồi nghe realtime, ví dụ:
-            val from = Timestamp(Date(System.currentTimeMillis() - CheckInRules.WINDOW_MINUTES * 60_000L))
-            return keos.whereGreaterThan(KeoFields.START_AT, from)
-                .orderBy(KeoFields.START_AT)
-                .limit(50)                       // gói Spark: giới hạn lượt đọc
-                .snapshotFlow()
-                .map { snapshot -> snapshot.documents.mapNotNull { it.toKeoDoc() } }
-        Khoảng cách và lọc theo môn, bán kính làm trong ExploreViewModel (tính Haversine trên máy).
-        ExploreViewModel đổi KeoDoc sang Keo bằng keoDoc.toKeo(members = emptyList(), myUid, distanceKm = ...).
-        """,
-    )
+    override fun observeActiveKeos(): Flow<List<KeoDoc>> {
+        val from = Timestamp(Date(System.currentTimeMillis() - 15 * 60_000L))
+        return keos.whereGreaterThan("startAt", from)
+            .orderBy("startAt")
+            .limit(50)
+            .snapshotFlow()
+            .map { snapshot -> snapshot.documents.mapNotNull { it.toKeoDoc() } }
+    }
 
-    override suspend fun createKeo(draft: KeoDraft, hostId: String, hostName: String): String = TODO(
-        """
-        Huy Hoàng: tạo kèo + document chủ kèo trong CÙNG MỘT batch, ví dụ:
-            val keoRef = keos.document()                         // Firestore tự sinh keoId
-            val code = taoMaMoiKhongTrung()                      // 6 ký tự, kiểm tra bằng whereEqualTo(KeoFields.INVITE_CODE, code)
-            firestore.batch()
-                .set(keoRef, draft.toNewKeoMap(hostId, code))    // memberCount = 1 (chủ kèo)
-                .set(
-                    keoRef.collection(FirestorePaths.MEMBERS).document(hostId),
-                    newMemberMap(hostId, hostName, MemberRole.HOST, MemberState.JOINED),
-                )
-                .commit().await()
-            return keoRef.id
-        Bắt buộc có document members/{hostId} với role = HOST:
-        - S15 dựa vào nó để biết ai là chủ kèo và hiện nút "Hủy kèo";
-        - luật truy cập (firestore.rules) chỉ cho tạo kèo khi document này được tạo cùng lúc.
-        """,
-    )
+    override suspend fun createKeo(draft: KeoDraft, hostId: String, hostName: String): String {
+        val keoRef = keos.document()
+        val code = taoMaMoiKhongTrung()
 
-    override suspend fun updateKeo(keoId: String, draft: KeoDraft) = TODO(
-        """
-        Huy Hoàng: keos.document(keoId).update(mapOf(...các trường của draft..., KeoFields.UPDATED_AT to FieldValue.serverTimestamp())).await()
-        KHÔNG ghi memberCount, hostId, inviteCode, createdAt ở đây: luật truy cập chặn đổi các trường đó khi sửa kèo.
-        Nếu cho giảm capacity, kiểm tra capacity >= memberCount trước khi lưu.
-        """,
-    )
+        val batch = firestore.batch()
+        batch.set(keoRef, draft.toNewKeoMap(hostId, code))
 
-    override suspend fun deleteKeo(keoId: String) = TODO(
-        """
-        Huy Hoàng: xóa document kèo KHÔNG tự xóa members/ và messages/ bên dưới (rủi ro mục 11 kế hoạch). Ví dụ:
-            val keoRef = keos.document(keoId)
-            val members = keoRef.collection(FirestorePaths.MEMBERS).get().await()
-            val messages = keoRef.collection(FirestorePaths.MESSAGES).get().await()
-            val batch = firestore.batch()
-            members.documents.forEach { batch.delete(it.reference) }
-            messages.documents.forEach { batch.delete(it.reference) }
-            batch.delete(keoRef)                                  // xóa kèo sau cùng
-            batch.commit().await()
-        Một batch tối đa 500 thao tác, đủ cho kèo ít người. Luật truy cập cho chủ kèo xóa mọi thành viên và tin nhắn.
-        Phong Hào đã gọi hàm này ở nút "Hủy kèo" của S15 (LobbyViewModel.cancelKeo).
-        """,
-    )
+        val hostMemberRef = keoRef.collection(FirestorePaths.MEMBERS).document(hostId)
+        val hostMemberMap = mapOf(
+            "uid" to hostId,
+            "name" to hostName,
+            "role" to "HOST",
+            "state" to "JOINED",
+            "joinedAt" to FieldValue.serverTimestamp()
+        )
+        batch.set(hostMemberRef, hostMemberMap)
 
-    override suspend fun findByInviteCode(code: String): KeoDoc? = TODO(
-        """
-        Huy Hoàng: keos.whereEqualTo(KeoFields.INVITE_CODE, code.trim().uppercase()).limit(1).get().await()
-                       .documents.firstOrNull()?.toKeoDoc()
-        """,
-    )
+        batch.commit().await()
+        return keoRef.id
+    }
+
+    override suspend fun updateKeo(keoId: String, draft: KeoDraft) {
+        val updateMap = mapOf(
+            "title" to draft.title,
+            "sport" to draft.sport.name,
+            "placeName" to draft.placeName,
+            "lat" to draft.lat,
+            "lng" to draft.lng,
+            "startAt" to draft.startAt,
+            "deadlineAt" to draft.deadlineAt,
+            "capacity" to draft.capacity,
+            "minTrust" to draft.minTrust,
+            "updatedAt" to FieldValue.serverTimestamp()
+        )
+        keos.document(keoId).update(updateMap).await()
+    }
+
+    override suspend fun deleteKeo(keoId: String) {
+        val keoRef = keos.document(keoId)
+        val members = keoRef.collection(FirestorePaths.MEMBERS).get().await()
+        val messages = keoRef.collection(FirestorePaths.MESSAGES).get().await()
+
+        val batch = firestore.batch()
+        members.documents.forEach { batch.delete(it.reference) }
+        messages.documents.forEach { batch.delete(it.reference) }
+        batch.delete(keoRef)
+        batch.commit().await()
+    }
+
+    override suspend fun findByInviteCode(code: String): KeoDoc? {
+        return keos.whereEqualTo("inviteCode", code.trim().uppercase())
+            .limit(1).get().await()
+            .documents.firstOrNull()?.toKeoDoc()
+    }
+
+    private suspend fun taoMaMoiKhongTrung(): String {
+        val charPool = ('A'..'Z') + ('0'..'9')
+        var isUnique = false
+        var code = ""
+        while (!isUnique) {
+            code = (1..6).map { Random.nextInt(0, charPool.size) }.map(charPool::get).joinToString("")
+            val check = keos.whereEqualTo("inviteCode", code).limit(1).get().await()
+            if (check.isEmpty) isUnique = true
+        }
+        return code
+    }
 }
