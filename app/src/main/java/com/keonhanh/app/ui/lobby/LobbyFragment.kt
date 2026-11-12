@@ -12,7 +12,6 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.keonhanh.app.R
 import com.keonhanh.app.data.model.CheckInState
-import com.keonhanh.app.data.model.Keo
 import com.keonhanh.app.data.model.KeoStatus
 import com.keonhanh.app.data.model.Member
 import com.keonhanh.app.data.model.MyRole
@@ -24,7 +23,6 @@ import com.keonhanh.app.ui.common.UiState
 import com.keonhanh.app.ui.common.appViewModels
 import com.keonhanh.app.ui.common.collectWhenStarted
 import com.keonhanh.app.util.bindAvatar
-import com.keonhanh.app.util.formatKm
 import com.keonhanh.app.util.showComingSoon
 
 /**
@@ -51,14 +49,13 @@ class LobbyFragment : Fragment(R.layout.fragment_lobby) {
             userRepository = container.userRepository,
         )
     }
-    private lateinit var keo: Keo
 
     private var memberAdapter: MemberAdapter? = null
+    private var snackbar: Snackbar? = null
     private var lastUi: LobbyUi? = null
     private var primaryEnabled = false
 
     /** Thẻ check-in (Minh Khoa): tuần 3 vẫn duyệt 7 trạng thái bằng menu demo, tuần 4 tính từ GPS. */
-    /** Tuần 2: duyệt lần lượt 7 trạng thái thẻ check-in bằng menu demo. Tuần 4: tính từ GPS. */
     private var demoStates: List<CheckInState> = emptyList()
     private var demoIndex = 0
     private var checkInState: CheckInState? = null
@@ -69,31 +66,7 @@ class LobbyFragment : Fragment(R.layout.fragment_lobby) {
         val nav = findNavController()
         val args = bundleOf(ARG_KEO_ID to keoId)
 
-        binding.cardChatPreview.setOnClickListener { nav.navigate(R.id.action_lobby_to_lobbyChat, args) }
-        binding.btnChat.setOnClickListener { nav.navigate(R.id.action_lobby_to_lobbyChat, args) }
-
-        if (keo.status == KeoStatus.CHECK_IN) {
-            // Mặc định trạng thái "đủ gần" để demo nút Check-in
-            demoStates = SampleData.checkInDemoStates(keo)
-            demoIndex = demoStates.indexOfFirst { it is CheckInState.InRange }.coerceAtLeast(0)
-            showCheckIn(demoStates[demoIndex])
-        } else {
-            binding.btnPrimary.setText(primaryTextForOpenKeo())
-        }
-        binding.btnPrimary.setOnClickListener { onPrimaryClick(it) }
-        binding.checkin.btnCheckinSecondary.setOnClickListener { it.showComingSoon() }
-    }
-
-    private fun setupToolbar(args: Bundle) {
-        val nav = findNavController()
         binding.toolbar.setNavigationOnClickListener { nav.navigateUp() }
-
-        // Mời bằng QR: kèo đang mở và mình đã ở trong kèo (thành viên nào cũng mời được)
-        binding.toolbar.menu.findItem(R.id.action_invite).isVisible =
-            keo.status == KeoStatus.OPEN && keo.myRole != MyRole.NONE
-        binding.toolbar.menu.findItem(R.id.action_demo_checkin).isVisible =
-            keo.status == KeoStatus.CHECK_IN
-
         binding.toolbar.setOnMenuItemClickListener { item ->
             when (item.itemId) {
                 R.id.action_invite -> nav.navigate(R.id.action_lobby_to_inviteQr, args)
@@ -106,11 +79,11 @@ class LobbyFragment : Fragment(R.layout.fragment_lobby) {
             true
         }
 
-        val openChat = View.OnClickListener { clicked ->
+        val openChat = View.OnClickListener {
             if (lastUi?.canOpenChat == true) {
                 nav.navigate(R.id.action_lobby_to_lobbyChat, args)
             } else {
-                Snackbar.make(clicked, R.string.lobby_chat_locked, Snackbar.LENGTH_SHORT).show()
+                showMessage(getString(R.string.lobby_chat_locked))
             }
         }
         binding.cardChatPreview.setOnClickListener(openChat)
@@ -125,10 +98,17 @@ class LobbyFragment : Fragment(R.layout.fragment_lobby) {
         }
         collectWhenStarted(viewModel.events) { event ->
             when (event) {
-                is LobbyEvent.ShowMessage ->
-                    Snackbar.make(binding.root, event.text.resolve(requireContext()), Snackbar.LENGTH_SHORT).show()
+                is LobbyEvent.ShowMessage -> showMessage(event.text.resolve(requireContext()))
                 LobbyEvent.Closed -> nav.navigateUp()
             }
+        }
+    }
+
+    /** Thông báo ngắn, đặt ngay trên thanh nút để không che nút chính; tự tắt khi rời màn (không đè sang S16). */
+    private fun showMessage(text: String) {
+        snackbar = Snackbar.make(binding.root, text, Snackbar.LENGTH_SHORT).apply {
+            if (binding.barActions.isVisible) anchorView = binding.barActions
+            show()
         }
     }
 
@@ -282,7 +262,7 @@ class LobbyFragment : Fragment(R.layout.fragment_lobby) {
             is CheckInState.InRange -> {
                 // Tuần 4 (Minh Khoa): ghi checkInAt, checkInDistanceM vào members/{uid} trên Firestore
                 showCheckIn(CheckInState.Done(time = "16:52", distanceM = state.distanceM))
-                Snackbar.make(button, R.string.checkin_success, Snackbar.LENGTH_SHORT).show()
+                showMessage(getString(R.string.checkin_success))
             }
             // Tuần 4: xin quyền ACCESS_FINE_LOCATION
             else -> button.showComingSoon()
@@ -291,6 +271,8 @@ class LobbyFragment : Fragment(R.layout.fragment_lobby) {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        snackbar?.dismiss()
+        snackbar = null
         memberAdapter = null
         _binding = null
     }
