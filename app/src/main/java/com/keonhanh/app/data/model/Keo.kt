@@ -40,7 +40,8 @@ data class Keo(
     val title: String,
     val sport: Sport,
     val place: String,
-    val distanceKm: Double,
+    /** Khoảng cách tới điểm hẹn; null khi chưa đo (S15, S17 không cần vị trí) thì thẻ kèo chỉ hiện tên điểm hẹn. */
+    val distanceKm: Double?,
     val time: String,
     val deadlineCountdown: String,
     val hostName: String,

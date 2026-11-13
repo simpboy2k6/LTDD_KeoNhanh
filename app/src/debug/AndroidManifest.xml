@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Chỉ áp dụng cho bản debug: cho phép nối HTTP thường tới Firebase Emulator chạy trên máy tính
+  (10.0.2.2 = máy tính nhìn từ máy ảo Android). Bản release không có file này.
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <application android:networkSecurityConfig="@xml/network_security_config_debug" />
+</manifest>
