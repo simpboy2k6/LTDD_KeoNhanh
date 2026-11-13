@@ -137,7 +137,7 @@ fun KeoDoc.toKeo(
         title = title,
         sport = sportEnum,
         place = placeName,
-        distanceKm = distanceKm,
+        distanceKm = distanceKm ?: 0.0,
         time = formatStartTime(startAt),
         deadlineCountdown = formatCountdown(deadlineAt.toDate().time - nowMillis),
         hostName = members.firstOrNull { it.role == MemberRole.HOST }?.displayName.orEmpty(),

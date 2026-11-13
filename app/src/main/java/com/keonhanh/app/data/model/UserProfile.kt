@@ -3,13 +3,13 @@ package com.keonhanh.app.data.model
 import kotlin.math.roundToInt
 
 data class UserProfile(
-    val uid: String,
-    val name: String,
-    val email: String,
-    val attended: Int,
-    val committed: Int,
-    val lateCancels: Int,
-    val hosted: Int,
+    val uid: String = "",
+    val name: String = "",
+    val email: String ="",
+    val attended: Int = 0,
+    val committed: Int = 0,
+    val lateCancels: Int = 0,
+    val hosted: Int = 0,
 ) {
     val noShows: Int get() = committed - attended
 
