@@ -27,11 +27,11 @@ class ProfileViewModel(
     val uiState: StateFlow<ProfileUiState> = _uiState.asStateFlow()
 
     // Tự động tải dữ liệu ngay khi ViewModel được khởi tạo
-    init {
+    /*init {
         fetchCurrentUserProfile()
-    }
+    }*/
 
-    private fun fetchCurrentUserProfile() {
+    public fun fetchCurrentUserProfile() {
         // Bước 1: Lấy thông tin tài khoản đang đăng nhập
         val currentUser = authRepository.currentUser
 
