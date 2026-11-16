@@ -3,9 +3,11 @@ package com.keonhanh.app.ui.auth
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.keonhanh.app.R
 import com.keonhanh.app.data.model.UserProfile
 import com.keonhanh.app.data.repository.AuthRepository
 import com.keonhanh.app.data.repository.UserRepository
+import com.keonhanh.app.util.AuthFireBaseUtils
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -17,7 +19,7 @@ sealed class AuthUiState {
     object Idle : AuthUiState()                  // Trạng thái chờ (chưa làm gì)
     object Loading : AuthUiState()               // Đang xoay vòng tải
     object Success : AuthUiState()               // Đăng nhập/Đăng ký thành công
-    data class Error(val message: String) : AuthUiState() // Có lỗi xảy ra
+    data class Error(val IdMessage: Int) : AuthUiState() // Có lỗi xảy ra
 }
 
 // 2. ViewModel chính
@@ -34,7 +36,7 @@ class AuthViewModel(
     // Hàm xử lý Đăng nhập (Cho màn hình S02)
     fun login(email: String, pass: String) {
         if (email.isBlank() || pass.isBlank()) {
-            _uiState.value = AuthUiState.Error("Vui lòng nhập đầy đủ thông tin")
+            _uiState.value = AuthUiState.Error(R.string.err_empty_fields)
             return
         }
 
@@ -45,7 +47,8 @@ class AuthViewModel(
             result.onSuccess {
                 _uiState.value = AuthUiState.Success
             }.onFailure { e ->
-                _uiState.value = AuthUiState.Error(e.message ?: "Đăng nhập thất bại")
+                val stringerrorid = AuthFireBaseUtils.translateAuthError(e as Exception)
+                _uiState.value = AuthUiState.Error(stringerrorid )
             }
         }
     }
@@ -66,7 +69,7 @@ class AuthViewModel(
     // Hàm xử lý Đăng ký (Cho màn hình S03)
     fun register(email: String, pass: String, fullName: String) {
         if (email.isBlank() || pass.isBlank() || fullName.isBlank()) {
-            _uiState.value = AuthUiState.Error("Vui lòng điền đủ các trường")
+            _uiState.value = AuthUiState.Error(R.string.err_empty_fields)
             return
         }
 
@@ -95,12 +98,12 @@ class AuthViewModel(
                     
                 }.onFailure { e ->
                     // Lỗi khi lưu vào database (mạng yếu, v.v.)
-                    _uiState.value = AuthUiState.Error(e.message ?: "Lỗi tạo hồ sơ dữ liệu")
+                    _uiState.value = AuthUiState.Error(AuthFireBaseUtils.translateAuthError(e as Exception))
                 }
 
             }.onFailure { e ->
                 // Lỗi khi tạo tài khoản (email đã tồn tại, pass quá ngắn...)
-                _uiState.value = AuthUiState.Error(e.message ?: "Đăng ký thất bại")
+                _uiState.value = AuthUiState.Error(AuthFireBaseUtils.translateAuthError(e as Exception))
             }
         }
     }

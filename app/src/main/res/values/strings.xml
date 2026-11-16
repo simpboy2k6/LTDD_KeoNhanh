@@ -49,4 +49,14 @@
     <string name="error_host_cannot_leave">Chủ kèo không rời được, hãy hủy kèo</string>
     <string name="error_leave_locked">Đã qua hạn chốt, không rời kèo được nữa</string>
     <string name="error_message_too_long">Tin nhắn quá dài (tối đa 1000 ký tự)</string>
+
+    <!-- Các thông báo lỗi Firebase Auth -->
+    <string name="err_empty_fields">Vui lòng điền đủ các trường</string>
+    <string name="err_invalid_email">Email không đúng định dạng.</string>
+    <string name="err_user_not_found">Tài khoản không tồn tại, vui lòng kiểm tra lại.</string>
+    <string name="err_wrong_password">Sai mật khẩu, vui lòng thử lại.</string>
+    <string name="err_email_in_use">Email này đã được sử dụng cho một tài khoản khác.</string>
+    <string name="err_weak_password">Mật khẩu quá yếu, vui lòng chọn mật khẩu từ 6 ký tự trở lên.</string>
+    <string name="err_network_request_failed">Lỗi mạng, vui lòng kiểm tra kết nối internet.</string>
+    <string name="err_unknown">Đã xảy ra lỗi không xác định. Vui lòng thử lại sau.</string>
 </resources>

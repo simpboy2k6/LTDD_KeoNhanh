@@ -100,7 +100,7 @@ class RegisterFragment : Fragment(R.layout.fragment_register) {
                         }
                         is AuthUiState.Error -> {
                             binding.btnRegister.isEnabled = true
-                            Toast.makeText(context, state.message, Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, getString(state.IdMessage), Toast.LENGTH_SHORT).show()
                             viewModel.resetState() // Tránh báo lỗi lại khi xoay màn hình
                         }
                     }

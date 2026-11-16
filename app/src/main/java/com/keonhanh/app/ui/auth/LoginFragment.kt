@@ -92,7 +92,7 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
                         is AuthUiState.Error -> {
                             binding.btnLogin.isEnabled = true
                             binding.btnLogin.text = "Đăng nhập";
-                            Toast.makeText(context, state.message, Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, getString(state.IdMessage), Toast.LENGTH_SHORT).show()
                             viewModel.resetState() // Tránh báo lỗi lại khi xoay màn hình
                         }
                     }

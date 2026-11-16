@@ -4,9 +4,10 @@ import com.google.firebase.auth.FirebaseAuthException
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
-import com.google.firebase.auth.R
+import com.keonhanh.app.R
 
-object FirebaseUtils {
+
+object AuthFireBaseUtils {
 
     // Hàm này nhận vào Exception trả về từ Firebase và xuất ra ID của string tiếng Việt
     fun translateAuthError(e: Exception): Int {
