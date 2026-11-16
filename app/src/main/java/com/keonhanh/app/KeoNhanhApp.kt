@@ -7,6 +7,6 @@ class KeoNhanhApp : Application(){
     lateinit var container : AppContainer
     public override fun onCreate() {
         super.onCreate()
-        container = AppContainer()
+        container = AppContainer(this)
     }
 }

@@ -1,13 +1,17 @@
 package com.keonhanh.app.data.repository
 
+import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.auth.userProfileChangeRequest
 import kotlinx.coroutines.tasks.await
 
 interface AuthRepository {
     val currentUser: FirebaseUser?
     suspend fun signIn(email: String, pass: String): Result<FirebaseUser>
     suspend fun signUp(email: String, pass: String): Result<FirebaseUser>
+    suspend fun sendPasswordReset(email: String): Result<Unit>
+    suspend fun  sendEmailVerification() :Result<Unit>
     fun signOut()
 }
 
@@ -30,14 +34,42 @@ class FirebaseAuthRepository(
 
     override suspend fun signUp(email: String, pass: String): Result<FirebaseUser> {
         return try {
+            // 1. Tạo tài khoản như cũ
             val result = firebaseAuth.createUserWithEmailAndPassword(email, pass).await()
-            result.user?.let { Result.success(it) }
-                ?: Result.failure(Exception("Lỗi: Không tạo được tài khoản"))
+            val user = result.user
+
+            if (user != null) {
+                try{
+                    user.sendEmailVerification().await()
+                }catch (e : Exception){
+                    Log.e("Auth", "Gửi email thất bại: ${e.message}")
+                }
+
+                Result.success(user)
+            } else {
+                Result.failure(Exception("Lỗi: Không tạo được tài khoản"))
+            }
         } catch (e: Exception) {
             Result.failure(e)
         }
     }
-
+    override suspend fun sendPasswordReset(email: String): Result<Unit> {
+        return try {
+            firebaseAuth.sendPasswordResetEmail(email).await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+    override suspend fun sendEmailVerification(): Result<Unit> {
+        return try {
+            val user = firebaseAuth.currentUser
+            user?.sendEmailVerification()?.await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
     override fun signOut() {
         firebaseAuth.signOut()
     }

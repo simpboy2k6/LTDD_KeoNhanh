@@ -1,5 +1,6 @@
 package com.keonhanh.app.di
 
+import android.content.Context
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.keonhanh.app.data.repository.AuthRepository
@@ -9,7 +10,9 @@ import com.keonhanh.app.data.repository.FirestoreChatRepository
 import com.keonhanh.app.data.repository.FirestoreKeoRepository
 import com.keonhanh.app.data.repository.FirestoreMemberRepository
 import com.keonhanh.app.data.repository.FirestoreUserRepository
+import com.keonhanh.app.data.repository.FusedLocationRepository
 import com.keonhanh.app.data.repository.KeoRepository
+import com.keonhanh.app.data.repository.LocationRepository
 import com.keonhanh.app.data.repository.MemberRepository
 import com.keonhanh.app.data.repository.UserRepository
 
@@ -23,7 +26,7 @@ import com.keonhanh.app.data.repository.UserRepository
  *
  * Cần thêm Repository mới thì nhắn Phong Hào thêm vào đây, đừng tự sửa để tránh conflict khi merge.
  */
-class AppContainer {
+class AppContainer(private val appContext : Context) {
     val firebaseAuth: FirebaseAuth = FirebaseAuth.getInstance()
     val firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
 
@@ -50,5 +53,8 @@ class AppContainer {
     /** Phong Hào: chat phòng chờ. */
     val chatRepository: ChatRepository by lazy {
         FirestoreChatRepository(firestore)
+    }
+    val locationRepository: LocationRepository by lazy {
+        FusedLocationRepository(appContext.applicationContext)
     }
 }
