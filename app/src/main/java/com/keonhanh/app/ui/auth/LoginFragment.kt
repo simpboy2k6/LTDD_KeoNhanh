@@ -47,25 +47,51 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
             val pass = binding.etPassword.text.toString()
 
             viewModel.login(email,pass);
-            // Tuần 3: kiểm tra email trường + FirebaseAuth.signInWithEmailAndPassword rồi mới quay lại
-            findNavController().popBackStack()
+
+
         }
         binding.btnRegister.setOnClickListener {
             findNavController().navigate(R.id.action_login_to_register)
         }
-        binding.btnForgotPassword.setOnClickListener { it.showComingSoon() }
-
+        binding.btnForgotPassword.setOnClickListener {
+            val email = binding.etEmail.text.toString()
+            // Dùng TextInputLayout.error để báo lỗi nếu chưa nhập email
+            if (email.isEmpty()) {
+                binding.tilEmail.error = "Vui lòng nhập email vào đây trước"
+            } else {
+                binding.tilEmail.error = null
+                viewModel.sendPasswordReset(email)
+            }
+        }
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED){
+                viewModel.resetPasswordMessage.collect {message ->
+                    if (message != null) {
+                        Toast.makeText(context, message, Toast.LENGTH_LONG).show()
+                        viewModel.clearResetPasswordMessage() // Xóa đi để không bị hiện lại khi xoay màn hình
+                    }
+                }
+            }
+        }
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.uiState.collect { state ->
                     when (state) {
                         is AuthUiState.Idle -> { /* Ẩn loading */ }
-                        is AuthUiState.Loading -> { /* Hiện vòng xoay Loading */ }
+                        is AuthUiState.Loading -> {
+
+                            binding.btnLogin.isEnabled = false
+                            binding.btnLogin.text = "Đang đăng nhập";
+                        }
                         is AuthUiState.Success -> {
+                            binding.btnLogin.isEnabled = true
+                            binding.btnLogin.text = "Đăng nhập";
                             Toast.makeText(context, "Đăng nhập thành công!", Toast.LENGTH_SHORT).show()
                             findNavController().navigate(R.id.action_login_to_explore_graph)
                         }
                         is AuthUiState.Error -> {
+                            binding.btnLogin.isEnabled = true
+                            binding.btnLogin.text = "Đăng nhập";
                             Toast.makeText(context, state.message, Toast.LENGTH_SHORT).show()
                             viewModel.resetState() // Tránh báo lỗi lại khi xoay màn hình
                         }

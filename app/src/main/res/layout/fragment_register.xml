@@ -41,12 +41,30 @@
             android:textAppearance="?attr/textAppearanceBodyMedium"
             android:textColor="?attr/colorOnSurfaceVariant" />
 
+        <!-- Trường Họ tên  -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/til_full_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_32"
+            android:hint="Nhập UserName"
+            app:startIconDrawable="@drawable/ic_person_24"> <!-- Lưu ý: Cần có icon ic_person_24 trong thư mục drawable -->
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/et_full_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:autofillHints="name"
+                android:imeOptions="actionNext"
+                android:inputType="textPersonName" />
+        </com.google.android.material.textfield.TextInputLayout>
+
         <!-- Trường Email -->
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/til_email"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/space_32"
+            android:layout_marginTop="@dimen/space_16"
             android:hint="Email sinh viên"
             app:helperText="Dùng email do trường cấp"
             app:startIconDrawable="@drawable/ic_mail_24">
