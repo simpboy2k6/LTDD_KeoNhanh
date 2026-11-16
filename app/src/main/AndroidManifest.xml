@@ -1,7 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!-- Tuần 3 thêm quyền vị trí, tuần 4 thêm quyền camera và thông báo -->
+    <!-- Tuần 4 (PR tuan4/hao-thu-vien): mọi quyền khai báo một lần ở đây -->
+
+    <!-- Mạng: Firestore, gọi API Nominatim (Retrofit), tải ô bản đồ osmdroid -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <!-- Vị trí: khoảng cách ở Khám phá, check-in GPS. Android 12+ phải khai báo cả hai -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+
+    <!-- Thông báo: Android 13+ phải xin lúc chạy -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <!-- Không cần quyền CAMERA: Google code scanner tự mở camera trong Google Play services -->
 
     <application
         android:name=".KeoNhanhApp"
@@ -11,6 +24,11 @@
         android:roundIcon="@mipmap/ic_launcher"
         android:supportsRtl="true"
         android:theme="@style/Theme.KeoNhanh">
+
+        <!-- Google code scanner: tải sẵn module quét mã khi cài từ Play Store (cài từ Android Studio thì tải ở lần quét đầu) -->
+        <meta-data
+            android:name="com.google.mlkit.vision.DEPENDENCIES"
+            android:value="barcode_ui" />
 
         <!-- Một Activity duy nhất; các màn hình là Fragment trong res/navigation/nav_graph.xml -->
         <activity

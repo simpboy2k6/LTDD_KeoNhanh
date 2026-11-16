@@ -57,4 +57,14 @@ dependencies {
     implementation("com.google.firebase:firebase-analytics")
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-firestore")
+
+    // Tuần 4: thư viện dùng chung (PR tuan4/hao-thu-vien). Cần thêm gì thì báo Phong Hào.
+    implementation(libs.play.services.location)      // GPS: khoảng cách ở Khám phá (Hoàng), check-in (Khoa)
+    implementation(libs.play.services.code.scanner)  // Quét QR mã mời, không cần quyền camera (Hào)
+    implementation(libs.zxing.core)                  // Tạo ảnh QR mã mời (Hào)
+    implementation(libs.androidx.work.runtime.ktx)   // Thông báo nền, nhắc giờ kèo (Hào)
+    implementation(libs.retrofit.core)               // Gọi API Nominatim (Hoàng)
+    implementation(libs.retrofit.converter.gson)
+    implementation(libs.okhttp.logging)              // Xem request, response trong Logcat khi debug
+    implementation(libs.osmdroid)                    // Bản đồ OpenStreetMap (Hoàng, ưu tiên 2)
 }
