@@ -1,5 +1,6 @@
 package com.keonhanh.app.data.repository
 
+import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.userProfileChangeRequest
@@ -38,8 +39,11 @@ class FirebaseAuthRepository(
             val user = result.user
 
             if (user != null) {
-
-                user.sendEmailVerification().await()
+                try{
+                    user.sendEmailVerification().await()
+                }catch (e : Exception){
+                    Log.e("Auth", "Gửi email thất bại: ${e.message}")
+                }
 
                 Result.success(user)
             } else {
