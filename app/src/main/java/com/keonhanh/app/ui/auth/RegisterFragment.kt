@@ -36,17 +36,48 @@ class RegisterFragment : Fragment(R.layout.fragment_register) {
         _binding = FragmentRegisterBinding.bind(view)
         // Ví dụ khi người dùng bấm nút Đăng ký
         binding.btnRegister.setOnClickListener {
-            val email = binding.etEmail.text.toString()
-            val pass = binding.etPassword.text.toString()
-            val confirmPass = binding.etConfirmPassword.text.toString()
+            val fullName = binding.etFullName.text.toString().trim()
+            val email = binding.etEmail.text.toString().trim()
+            val password = binding.etPassword.text.toString().trim()
+            val confirmPassword = binding.etConfirmPassword.text.toString().trim()
 
-            if (pass != confirmPass) {
-                Toast.makeText(context, "Mật khẩu xác nhận không khớp!", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
+            // 1. XÓA TẤT CẢ LỖI CŨ (Reset lại trạng thái bình thường)
+            binding.tilFullName.error = null
+            binding.tilEmail.error = null
+            binding.tilPassword.error = null
+            binding.tilConfirmPassword.error = null
+
+            // 2. KIỂM TRA TỪNG ĐIỀU KIỆN VÀ BÁO LỖI VÀO TỪNG Ô
+            var isValid = true
+
+            if (fullName.isEmpty()) {
+                binding.tilFullName.error = "Vui lòng nhập họ và tên" // Hiện chữ đỏ dưới ô Họ tên
+                isValid = false
             }
-            val name = if (email.contains("@")) email.substringBefore("@") else "User"
 
-            viewModel.register(email, pass, name)
+            if (email.isEmpty()) {
+                binding.tilEmail.error = "Vui lòng nhập email" // Hiện chữ đỏ dưới ô Email
+                isValid = false
+            } else if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+                binding.tilEmail.error = "Email không đúng định dạng"
+                isValid = false
+            }
+
+            if (password.length < 6) {
+                binding.tilPassword.error = "Mật khẩu phải từ 6 ký tự trở lên" // Hiện chữ đỏ dưới ô Mật khẩu
+                isValid = false
+            }
+
+            if (confirmPassword != password) {
+                binding.tilConfirmPassword.error = "Mật khẩu xác nhận không khớp" // Hiện chữ đỏ dưới ô Xác nhận
+                isValid = false
+            }
+
+            // 3. NẾU MỌI THỨ ĐỀU ĐÚNG THÌ MỚI GỌI VIEWMODEL ĐỂ ĐĂNG KÝ
+            if (isValid) {
+                // Đây chính là phần "truyền tên thật" mà yêu cầu nhắc tới
+                viewModel.register(email, password, fullName)
+            }
         }
         binding.btnGoToLogin.setOnClickListener {
             // Gọi action quay lại màn Đăng nhập
@@ -58,12 +89,17 @@ class RegisterFragment : Fragment(R.layout.fragment_register) {
                 viewModel.uiState.collect { state ->
                     when (state) {
                         is AuthUiState.Idle -> { /* Ẩn loading */ }
-                        is AuthUiState.Loading -> { /* Hiện vòng xoay Loading */ }
+                        is AuthUiState.Loading -> {
+                            binding.btnRegister.isEnabled = false
+                            binding.btnRegister.text = "Đăng đăng ký"
+                        }
                         is AuthUiState.Success -> {
-                            Toast.makeText(context, "Đăng ký thành công!", Toast.LENGTH_SHORT).show()
-                            findNavController().navigate(R.id.action_register_to_explore_graph)
+                            binding.btnRegister.isEnabled = true
+                            Toast.makeText(context, "Đăng ký thành công! Vui lòng xác nhận email", Toast.LENGTH_SHORT).show()
+                            findNavController().navigate(R.id.action_register_to_login)
                         }
                         is AuthUiState.Error -> {
+                            binding.btnRegister.isEnabled = true
                             Toast.makeText(context, state.message, Toast.LENGTH_SHORT).show()
                             viewModel.resetState() // Tránh báo lỗi lại khi xoay màn hình
                         }
