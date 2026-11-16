@@ -1,5 +1,6 @@
 # Version catalog: mọi phiên bản thư viện khai báo một chỗ.
-# Tuần 3 thêm Firebase (BoM), osmdroid; tuần 4 thêm Code Scanner + ZXing, WorkManager.
+# Tuần 3 thêm Firebase (BoM). Tuần 4 thêm các thư viện dùng chung ở cuối mỗi nhóm (PR tuan4/hao-thu-vien).
+# Cần thư viện mới thì báo Phong Hào hoặc mở PR nhỏ riêng, đừng sửa chung trong PR tính năng.
 [versions]
 agp = "8.7.3"
 kotlin = "2.4.0"
@@ -14,7 +15,14 @@ recyclerview = "1.3.2"
 junit = "4.13.2"
 androidxJunit = "1.2.1"
 espressoCore = "3.6.1"
-
+# Tuần 4
+playServicesLocation = "21.3.0"
+playServicesCodeScanner = "16.1.0"
+zxingCore = "3.5.3"
+work = "2.10.5"
+retrofit = "3.0.0"
+okhttp = "4.12.0"
+osmdroid = "6.1.20"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -29,6 +37,15 @@ androidx-recyclerview = { group = "androidx.recyclerview", name = "recyclerview"
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "androidxJunit" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
+# Tuần 4
+play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocation" }
+play-services-code-scanner = { group = "com.google.android.gms", name = "play-services-code-scanner", version.ref = "playServicesCodeScanner" }
+zxing-core = { group = "com.google.zxing", name = "core", version.ref = "zxingCore" }
+androidx-work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "work" }
+retrofit-core = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
+retrofit-converter-gson = { group = "com.squareup.retrofit2", name = "converter-gson", version.ref = "retrofit" }
+okhttp-logging = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "okhttp" }
+osmdroid = { group = "org.osmdroid", name = "osmdroid-android", version.ref = "osmdroid" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
