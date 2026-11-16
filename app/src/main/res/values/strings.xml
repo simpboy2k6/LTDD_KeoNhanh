@@ -34,6 +34,9 @@
     <string name="slot_empty" translatable="false">+</string>
 
     <!-- Lỗi dùng chung (tuần 3): Repository ném AppException(R.string.error_...), Fragment hiện bằng Snackbar -->
+    <string name="error_location_permission">Cần quyền vị trí để làm việc này</string>
+    <string name="error_location_off">Hãy bật Vị trí trong cài đặt máy</string>
+    <string name="error_location_unavailable">Chưa lấy được vị trí, thử lại ở chỗ thoáng hơn</string>
     <string name="error_generic">Có lỗi xảy ra, thử lại sau</string>
     <string name="error_network">Mất kết nối mạng, thử lại sau</string>
     <string name="error_permission">Bạn không có quyền làm việc này</string>
