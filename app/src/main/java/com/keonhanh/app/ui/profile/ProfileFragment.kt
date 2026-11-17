@@ -19,6 +19,7 @@ import com.keonhanh.app.util.showComingSoon
 import kotlinx.coroutines.launch
 import android.content.Context
 import android.view.inputmethod.InputMethodManager
+import androidx.navigation.navOptions
 
 /** S05 Hồ sơ (TV1). Layout: res/layout/fragment_profile.xml */
 class ProfileFragment : Fragment(R.layout.fragment_profile) {
@@ -105,9 +106,10 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
                 viewModel.uiState.collect { state ->
                     when (state) {
                         is ProfileUiState.Loading -> {
-                            // TODO: Hiển thị ProgressBar (nếu có)
+                            binding.progressBar.visibility = View.VISIBLE
                         }
                         is ProfileUiState.Success -> {
+                            binding.progressBar.visibility = View.GONE
                             val user = state.profile
                             binding.tvName.setText(user.name)
                             binding.tvEmail.text = user.email
@@ -121,6 +123,7 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
                             binding.tvStatHosted.text = user.hosted.toString()
                         }
                         is ProfileUiState.Error -> {
+                            binding.progressBar.visibility = View.GONE
                             Toast.makeText(context, state.message, Toast.LENGTH_SHORT).show()
                         }
                     }
@@ -131,7 +134,11 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
         binding.rowPlaces.setOnClickListener { it.showComingSoon() } // S14, P1
         binding.rowHistory.setOnClickListener { it.showComingSoon() }
         binding.btnLogout.setOnClickListener {
-            findNavController().navigate(R.id.action_global_login)
+            viewModel.signOut()   // thêm hàm này vào ProfileViewModel: authRepository.signOut()
+            findNavController().navigate(
+                R.id.action_global_login, null,
+                navOptions { popUpTo(R.id.nav_graph) { inclusive = true } }   // xóa back stack
+            )
         }
     }
 

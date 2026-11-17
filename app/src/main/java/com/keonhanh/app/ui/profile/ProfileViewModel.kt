@@ -32,6 +32,9 @@ class ProfileViewModel(
     /*init {
         fetchCurrentUserProfile()
     }*/
+    public fun signOut(){
+        authRepository.signOut()
+    }
     public fun updateUsername(name : String){
         val currentUser = authRepository.currentUser
 

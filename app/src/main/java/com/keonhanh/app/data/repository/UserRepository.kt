@@ -31,7 +31,7 @@ class FirestoreUserRepository(
         return try{
             firestore.collection("users")
                 .document(uid)
-                .update("name",name)
+                .update("name",name).await()
             Result.success(Unit)
         }catch(e: Exception){
             Result.failure(e)
