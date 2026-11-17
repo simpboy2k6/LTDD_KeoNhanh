@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.keonhanh.app.data.model.UserProfile
 import com.keonhanh.app.data.repository.AuthRepository
 import com.keonhanh.app.data.repository.UserRepository
+import com.keonhanh.app.ui.auth.AuthUiState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -26,11 +27,28 @@ class ProfileViewModel(
     private val _uiState = MutableStateFlow<ProfileUiState>(ProfileUiState.Loading)
     val uiState: StateFlow<ProfileUiState> = _uiState.asStateFlow()
 
-    // Tự động tải dữ liệu ngay khi ViewModel được khởi tạo
+    private val _changeName = MutableStateFlow<String?>(null)
+    val changeName: StateFlow<String?> = _changeName.asStateFlow()
     /*init {
         fetchCurrentUserProfile()
     }*/
+    public fun updateUsername(name : String){
+        val currentUser = authRepository.currentUser
 
+        if (currentUser == null) {
+            _uiState.value = ProfileUiState.Error("Người dùng chưa đăng nhập")
+            return
+        }
+        viewModelScope.launch{
+            val result = userRepository.ChangeUserName(name,currentUser.uid)
+
+            result.onSuccess {
+                _changeName.value = "Đã đổi tên thành công"
+            }.onFailure { e->
+                _changeName.value = e.message ?: "Có lỗi về mạng "
+            }
+        }
+    }
     public fun fetchCurrentUserProfile() {
         // Bước 1: Lấy thông tin tài khoản đang đăng nhập
         val currentUser = authRepository.currentUser
@@ -54,6 +72,9 @@ class ProfileViewModel(
                 _uiState.value = ProfileUiState.Error(e.message ?: "Lỗi kết nối cơ sở dữ liệu")
             }
         }
+    }
+    public fun resetChangeName(){
+        _changeName.value = null;
     }
     class ProfileViewModelFactory(
         private val authRepository: AuthRepository,
