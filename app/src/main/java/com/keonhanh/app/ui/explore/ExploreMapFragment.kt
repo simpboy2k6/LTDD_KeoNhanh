@@ -22,7 +22,11 @@ class ExploreMapFragment : Fragment(R.layout.fragment_explore_map) {
 
     // Dùng chung ExploreViewModel để lấy danh sách từ Firestore
     private val viewModel: ExploreViewModel by appViewModels { container ->
-        ExploreViewModel(container.keoRepository, container.authRepository)
+        ExploreViewModel(
+            authRepository = container.authRepository,
+            keoRepository = container.keoRepository,
+            locationRepository = container.locationRepository
+        )
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -36,7 +40,10 @@ class ExploreMapFragment : Fragment(R.layout.fragment_explore_map) {
             onToggle = { nav.navigate(R.id.action_exploreMap_to_exploreList) },
             onOpenFilter = { nav.navigate(R.id.action_exploreMap_to_filter) },
             onScanInvite = { nav.navigate(R.id.action_exploreMap_to_scanQr) },
-            onSportChanged = { sport -> viewModel.filterBySport(sport) }
+            onSportChanged = { sport ->
+                val currentFilter = viewModel.filterFlow.value
+                viewModel.updateFilter(currentFilter.copy(sport = sport?.name ?: ""))
+            }
         )
 
         binding.fabCreate.setOnClickListener { nav.navigate(R.id.action_exploreMap_to_createKeo) }

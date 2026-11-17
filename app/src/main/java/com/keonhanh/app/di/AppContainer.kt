@@ -3,6 +3,7 @@ package com.keonhanh.app.di
 import android.content.Context
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.keonhanh.app.data.remote.GeocodingRepository
 import com.keonhanh.app.data.repository.AuthRepository
 import com.keonhanh.app.data.repository.ChatRepository
 import com.keonhanh.app.data.repository.FirebaseAuthRepository
@@ -44,6 +45,8 @@ class AppContainer(private val appContext : Context) {
     val keoRepository: KeoRepository by lazy {
         FirestoreKeoRepository(firestore)
     }
+    /** Huy Hoàng: Khám phá. */
+    val geocodingRepository: GeocodingRepository by lazy { GeocodingRepository() }
 
     /** Phong Hào: tham gia, xin vào, rời kèo. */
     val memberRepository: MemberRepository by lazy {

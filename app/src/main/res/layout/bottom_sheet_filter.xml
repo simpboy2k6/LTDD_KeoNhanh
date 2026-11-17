@@ -63,6 +63,42 @@
             app:chipIconVisible="true" />
     </com.google.android.material.chip.ChipGroup>
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/space_24"
+        android:text="Thời gian"
+        android:textAppearance="?attr/textAppearanceTitleMedium" />
+
+    <com.google.android.material.chip.ChipGroup
+        android:id="@+id/chip_group_time"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/space_8"
+        app:singleSelection="true">
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chip_today"
+            style="@style/Widget.KeoNhanh.Chip.Filter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Hôm nay" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chip_tomorrow"
+            style="@style/Widget.KeoNhanh.Chip.Filter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Ngày mai" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chip_weekend"
+            style="@style/Widget.KeoNhanh.Chip.Filter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Cuối tuần" />
+    </com.google.android.material.chip.ChipGroup>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

@@ -32,14 +32,14 @@
                 android:src="@drawable/ic_search_24"
                 app:tint="?attr/colorOnSurfaceVariant" />
 
-            <TextView
+            <EditText
                 android:id="@+id/tv_search_hint"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/space_12"
                 android:layout_weight="1"
                 android:maxLines="1"
-                android:text="@string/explore_search_hint"
+                android:hint="Tìm theo tên kèo..."
                 android:textAppearance="?attr/textAppearanceBodyLarge"
                 android:textColor="?attr/colorOnSurfaceVariant" />
 

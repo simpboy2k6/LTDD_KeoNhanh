@@ -77,25 +77,37 @@ service cloud.firestore {
           || (after == before - 1 && wasJoined(keoId, me) && !existsAfter(memberPath(keoId, me)))
         );
     }
-
+    function isValidKeoData() {
+          let data = request.resource.data;
+          return data.title is string
+            && data.title.size() >= 3
+            && data.title.size() <= 60
+            && data.capacity is int
+            && data.capacity >= 2
+            && data.capacity <= 30
+            && data.deadlineAt is timestamp
+            && data.deadlineAt > request.time;
+    }
     match /keos/{keoId} {
-      allow read: if signedIn();
+          allow read: if signedIn();
 
-      // Tạo kèo: mình là chủ, memberCount = 1, và document members/{mình} (role HOST) được tạo trong cùng batch
-      allow create: if signedIn()
-        && request.resource.data.hostId == request.auth.uid
-        && request.resource.data.memberCount == 1
-        && isJoinedAfter(keoId, request.auth.uid);
+          // Tạo kèo: mình là chủ, memberCount = 1, hợp lệ dữ liệu, và document members/{mình} tạo cùng batch
+          allow create: if signedIn()
+            && request.resource.data.hostId == request.auth.uid
+            && request.resource.data.memberCount == 1
+            && isValidKeoData()
+            && isJoinedAfter(keoId, request.auth.uid);
 
-      // Sửa kèo: chủ kèo sửa nội dung nhưng không đổi hostId, memberCount, inviteCode;
-      // hoặc thành viên đổi memberCount theo memberCountStep (Phong Hào)
-      allow update: if (isHost(keoId)
-          && request.resource.data.hostId == resource.data.hostId
-          && request.resource.data.memberCount == resource.data.memberCount
-          && request.resource.data.inviteCode == resource.data.inviteCode)
-        || (signedIn() && memberCountStep(keoId));
+          // Sửa kèo: chủ kèo sửa nội dung hợp lệ (không đổi hostId, memberCount, inviteCode);
+          // hoặc thành viên đổi memberCount theo memberCountStep (Phong Hào)
+          allow update: if (isHost(keoId)
+              && request.resource.data.hostId == resource.data.hostId
+              && request.resource.data.memberCount == resource.data.memberCount
+              && request.resource.data.inviteCode == resource.data.inviteCode
+              && isValidKeoData())
+            || (signedIn() && memberCountStep(keoId));
 
-      allow delete: if isHost(keoId);
+          allow delete: if isHost(keoId);
 
       // ---------- keos/{keoId}/members/{uid} (Phong Hào) ----------
 

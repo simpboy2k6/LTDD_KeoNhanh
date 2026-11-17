@@ -1,9 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--
-  S13 Chọn điểm hẹn (TV2, nâng lên P0 vì check-in tính theo khoảng cách tới điểm này).
-  Ghim luôn nằm giữa bản đồ; vòng tròn minh họa bán kính check-in 100 m.
-  Tuần 3: thay iv_map bằng MapView của osmdroid, đọc tọa độ tâm bản đồ khi bấm "Dùng vị trí này".
--->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -19,6 +14,33 @@
         app:navigationContentDescription="@string/action_back"
         app:navigationIcon="@drawable/ic_arrow_back_24"
         app:title="@string/pick_title" />
+
+    <!-- Thanh tìm kiếm địa chỉ gọi API Nominatim -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingHorizontal="@dimen/space_16"
+        android:paddingBottom="@dimen/space_8">
+
+        <EditText
+            android:id="@+id/et_search_address"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:hint="Nhập địa chỉ sân, quán..."
+            android:imeOptions="actionSearch"
+            android:inputType="text"
+            android:maxLines="1" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_search_address"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/space_8"
+            android:text="Tìm" />
+    </LinearLayout>
 
     <FrameLayout
         android:layout_width="match_parent"
@@ -39,7 +61,6 @@
             android:layout_gravity="center"
             android:background="@drawable/bg_checkin_radius" />
 
-        <!-- Đầu nhọn của ghim nằm đúng tâm bản đồ -->
         <ImageView
             android:layout_width="@dimen/pin_size"
             android:layout_height="@dimen/pin_size"
@@ -48,6 +69,24 @@
             android:src="@drawable/ic_location_on_24"
             android:translationY="@dimen/pin_offset"
             app:tint="@color/kn_green_text" />
+
+        <!-- Danh sách kết quả tìm kiếm từ Nominatim -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_search_results"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/space_16"
+            android:background="?attr/colorSurface"
+            android:elevation="4dp"
+            android:visibility="gone"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+
+        <ProgressBar
+            android:id="@+id/progress_bar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:visibility="gone" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/fab_my_location"
@@ -71,16 +110,17 @@
             android:id="@+id/tv_place"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textAppearance="?attr/textAppearanceTitleMedium"
-            tools:text="Sân bóng gần cổng trường" />
+            android:text="Chưa chọn địa điểm"
+            android:textAppearance="?attr/textAppearanceTitleMedium" />
 
         <TextView
+            android:id="@+id/tv_coords"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/space_4"
-            android:text="@string/pick_hint"
-            android:textAppearance="?attr/textAppearanceBodyMedium"
-            android:textColor="?attr/colorOnSurfaceVariant" />
+            android:textAppearance="?attr/textAppearanceBodySmall"
+            android:textColor="?attr/colorOnSurfaceVariant"
+            tools:text="16.0748, 108.1512" />
 
         <TextView
             android:id="@+id/tv_radius_note"
@@ -91,11 +131,21 @@
             android:textColor="@color/kn_green_text"
             tools:text="Vòng tròn là vùng check-in 100 m quanh điểm hẹn" />
 
+        <!-- Bắt buộc ghi nguồn theo quy định của Nominatim -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_4"
+            android:text="© OpenStreetMap"
+            android:textAppearance="?attr/textAppearanceLabelSmall"
+            android:textColor="?attr/colorOnSurfaceVariant" />
+
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_confirm"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/space_16"
+            android:enabled="false"
             android:text="@string/pick_confirm" />
     </LinearLayout>
 </LinearLayout>

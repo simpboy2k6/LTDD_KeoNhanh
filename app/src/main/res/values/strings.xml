@@ -52,7 +52,18 @@
     <string name="error_host_cannot_leave">Chủ kèo không rời được, hãy hủy kèo</string>
     <string name="error_leave_locked">Đã qua hạn chốt, không rời kèo được nữa</string>
     <string name="error_message_too_long">Tin nhắn quá dài (tối đa 1000 ký tự)</string>
-
+    <string name="error_empty_keo">Không có kèo phù hợp, thử nới bán kính</string>
+    <string name="error_address_too_short">Vui lòng nhập địa chỉ ít nhất 3 ký tự</string>
+    <string name="error_address_not_found">Không tìm thấy địa chỉ này</string>
+    <string name="error_geocoding_busy">Dịch vụ bản đồ đang bận, thử lại sau</string>
+    <string name="error_keo_title_length">Tên kèo từ 3 đến 60 ký tự</string>
+    <string name="error_keo_place_required">Vui lòng chọn điểm hẹn trên bản đồ</string>
+    <string name="error_keo_capacity">Số người từ 2 đến 30</string>
+    <string name="error_keo_deadline_required">Vui lòng chọn hạn chốt</string>
+    <string name="error_keo_deadline_min">Hạn chốt phải sau bây giờ ít nhất 15 phút</string>
+    <string name="error_keo_start_required">Vui lòng chọn giờ hẹn</string>
+    <string name="error_keo_start_after_deadline">Giờ hẹn phải sau hạn chốt</string>
+    <string name="error_keo_trust_range">Ngưỡng uy tín từ 0 đến 100</string>
     <!-- Các thông báo lỗi Firebase Auth -->
     <string name="err_empty_fields">Vui lòng điền đủ các trường</string>
     <string name="err_invalid_email">Email không đúng định dạng.</string>
