@@ -3,6 +3,7 @@ package com.keonhanh.app.ui.explore
 import android.os.Bundle
 import android.view.View
 import androidx.core.os.bundleOf
+import androidx.fragment.app.setFragmentResultListener
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
@@ -22,7 +23,22 @@ class ExploreMapFragment : Fragment(R.layout.fragment_explore_map) {
 
     // Dùng chung ExploreViewModel để lấy danh sách từ Firestore
     private val viewModel: ExploreViewModel by appViewModels { container ->
-        ExploreViewModel(container.keoRepository, container.authRepository)
+        ExploreViewModel(
+            authRepository = container.authRepository,
+            keoRepository = container.keoRepository,
+            locationRepository = container.locationRepository
+        )
+    }
+    private var hasAskedLocationThisSession = false
+
+    private val locationPermissionLauncher = registerForActivityResult(
+        androidx.activity.result.contract.ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        val granted = permissions[android.Manifest.permission.ACCESS_FINE_LOCATION] == true ||
+                permissions[android.Manifest.permission.ACCESS_COARSE_LOCATION] == true
+        if (granted) {
+            viewModel.refreshLocation()
+        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -30,13 +46,41 @@ class ExploreMapFragment : Fragment(R.layout.fragment_explore_map) {
         _binding = FragmentExploreMapBinding.bind(view)
         val nav = findNavController()
 
+        setFragmentResultListener(FilterBottomSheet.REQUEST_KEY) { _, b ->
+            val sport = b.getString(FilterBottomSheet.KEY_SPORT).orEmpty()
+            val radius = b.getFloat(FilterBottomSheet.KEY_RADIUS, FilterBottomSheet.DEFAULT_RADIUS_KM)
+            val time = b.getString(FilterBottomSheet.KEY_TIME).orEmpty()
+
+            val currentFilter = viewModel.filterFlow.value
+            viewModel.updateFilter(
+                currentFilter.copy(
+                    sport = sport,
+                    radiusKm = radius,
+                    timeRange = time
+                )
+            )
+        }
+
         binding.header.setup(
             toggleText = R.string.explore_show_list,
             toggleIcon = R.drawable.ic_format_list_bulleted_24,
             onToggle = { nav.navigate(R.id.action_exploreMap_to_exploreList) },
-            onOpenFilter = { nav.navigate(R.id.action_exploreMap_to_filter) },
+            onOpenFilter = {
+                val f = viewModel.filterFlow.value
+                nav.navigate(
+                    R.id.action_exploreMap_to_filter,
+                    bundleOf(
+                        FilterBottomSheet.KEY_SPORT to f.sport,
+                        FilterBottomSheet.KEY_RADIUS to f.radiusKm,
+                        FilterBottomSheet.KEY_TIME to f.timeRange
+                    )
+                )
+            },
             onScanInvite = { nav.navigate(R.id.action_exploreMap_to_scanQr) },
-            onSportChanged = { sport -> viewModel.filterBySport(sport) }
+            onSportChanged = { sport ->
+                val currentFilter = viewModel.filterFlow.value
+                viewModel.updateFilter(currentFilter.copy(sport = sport?.name ?: ""))
+            }
         )
 
         binding.fabCreate.setOnClickListener { nav.navigate(R.id.action_exploreMap_to_createKeo) }
@@ -71,6 +115,24 @@ class ExploreMapFragment : Fragment(R.layout.fragment_explore_map) {
                 }
             }
         }
+        collectWhenStarted(viewModel.filterFlow) { filter ->
+            binding.header.updateRadius(filter.radiusKm.toInt())
+        }
+        val container = (requireActivity().application as com.keonhanh.app.KeoNhanhApp).container
+        if (!container.locationRepository.hasPermission() && !hasAskedLocationThisSession) {
+            hasAskedLocationThisSession = true
+            locationPermissionLauncher.launch(
+                arrayOf(
+                    android.Manifest.permission.ACCESS_FINE_LOCATION,
+                    android.Manifest.permission.ACCESS_COARSE_LOCATION
+                )
+            )
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        viewModel.refreshLocation()
     }
 
     override fun onDestroyView() {

@@ -7,6 +7,7 @@ import android.view.View
 import android.widget.EditText
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
+import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResultListener
 import androidx.lifecycle.lifecycleScope
@@ -29,16 +30,21 @@ class CreateKeoFragment : Fragment(R.layout.fragment_create_keo) {
     private var _binding: FragmentCreateKeoBinding? = null
     private val binding get() = _binding!!
 
-    // Khởi tạo ViewModel bằng hàm appViewModels của TV3
+    private var pickedLat: Double? = null
+    private var pickedLng: Double? = null
+
     private val viewModel: CreateKeoViewModel by appViewModels { container ->
-        CreateKeoViewModel(container.keoRepository, container.authRepository)
+        CreateKeoViewModel(
+            keoRepository = container.keoRepository,
+            authRepository = container.authRepository,
+            userRepository = container.userRepository
+        )
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         _binding = FragmentCreateKeoBinding.bind(view)
 
-        // Đã sửa lỗi chính tả setNavigationOnClickListener
         binding.toolbar.setNavigationOnClickListener { findNavController().navigateUp() }
 
         // Số người: hiện giá trị cạnh tiêu đề
@@ -52,9 +58,20 @@ class CreateKeoFragment : Fragment(R.layout.fragment_create_keo) {
             binding.rowTrust.isVisible = isChecked
         }
 
-        // Điểm hẹn: mở S13, nhận lại tên địa điểm qua Fragment Result
+        // Xóa lỗi dưới ô nhập khi người dùng sửa lại dữ liệu
+        binding.etName.doAfterTextChanged { binding.tilName.error = null }
+
+        // Điểm hẹn: mở S13, nhận lại cả tên, lat, lng qua Fragment Result
         setFragmentResultListener(PickLocationFragment.REQUEST_KEY) { _, result ->
-            _binding?.etPlace?.setText(result.getString(PickLocationFragment.KEY_PLACE))
+            val place = result.getString(PickLocationFragment.KEY_PLACE).orEmpty()
+            val lat = result.getDouble(PickLocationFragment.KEY_LAT, Double.NaN)
+            val lng = result.getDouble(PickLocationFragment.KEY_LNG, Double.NaN)
+            if (place.isNotBlank() && !lat.isNaN() && !lng.isNaN()) {
+                pickedLat = lat
+                pickedLng = lng
+                _binding?.etPlace?.setText(place)
+                _binding?.tilPlace?.error = null
+            }
         }
         val openPicker = View.OnClickListener {
             findNavController().navigate(R.id.action_createKeo_to_pickLocation)
@@ -62,31 +79,39 @@ class CreateKeoFragment : Fragment(R.layout.fragment_create_keo) {
         binding.etPlace.setOnClickListener(openPicker)
         binding.tilPlace.setEndIconOnClickListener(openPicker)
 
-        // Ẩn ô Giờ hẹn trên giao diện (chỉ dùng code)
-        binding.etTime.visibility = View.GONE
-
-        // Mở bộ chọn ngày giờ khi bấm vào Hạn chốt
-        binding.etDeadline.setOnClickListener { showDateTimePicker(binding.etDeadline) }
+        // Mở bộ chọn ngày giờ cho cả Giờ hẹn và Hạn chốt
+        binding.etTime.setOnClickListener {
+            binding.tilTime.error = null
+            showDateTimePicker(binding.etTime)
+        }
+        binding.etDeadline.setOnClickListener {
+            binding.tilDeadline.error = null
+            showDateTimePicker(binding.etDeadline)
+        }
 
         // Logic xử lý khi bấm nút Tạo Kèo
         binding.btnCreate.setOnClickListener {
-            val title = binding.etName.text.toString()
-            val place = binding.etPlace.text.toString()
+            if (!validateInputsOnUi()) return@setOnClickListener
+
+            val selectedSport = when (binding.chipGroupSport.checkedChipId) {
+                R.id.chip_badminton -> Sport.BADMINTON
+                R.id.chip_board_game -> Sport.BOARD_GAME
+                else -> Sport.SOCCER
+            }
+
+            val title = binding.etName.text?.toString().orEmpty()
+            val place = binding.etPlace.text?.toString().orEmpty()
             val capacity = binding.sliderPlayers.value.toInt()
             val minTrust = if (binding.switchTrust.isChecked) binding.sliderTrust.value.toInt() else null
 
-            // Hardcode tọa độ tạm thời
-            val mockLat = 16.0748
-            val mockLng = 108.1512
-
             viewModel.createKeo(
-                title = title,
-                sport = Sport.SOCCER,
-                placeName = place,
-                lat = mockLat,
-                lng = mockLng,
-                // Không truyền startAtString nữa
-                deadlineAtString = binding.etDeadline.text.toString(),
+                rawTitle = title,
+                sport = selectedSport,
+                rawPlaceName = place,
+                lat = pickedLat,
+                lng = pickedLng,
+                startAtString = binding.etTime.text?.toString().orEmpty(),
+                deadlineAtString = binding.etDeadline.text?.toString().orEmpty(),
                 capacity = capacity,
                 minTrust = minTrust
             )
@@ -120,6 +145,53 @@ class CreateKeoFragment : Fragment(R.layout.fragment_create_keo) {
         }
     }
 
+    // Báo lỗi trực tiếp dưới từng ô nhập theo bảng mục 5
+    private fun validateInputsOnUi(): Boolean {
+        var isValid = true
+
+        val title = binding.etName.text?.toString()?.trim().orEmpty()
+        if (title.length !in 3..60) {
+            binding.tilName.error = getString(R.string.error_keo_title_length)
+            isValid = false
+        }
+
+        val place = binding.etPlace.text?.toString()?.trim().orEmpty()
+        if (place.isBlank() || pickedLat == null || pickedLng == null) {
+            binding.tilPlace.error = getString(R.string.error_keo_place_required)
+            isValid = false
+        }
+
+        val deadlineStr = binding.etDeadline.text?.toString().orEmpty()
+        val startStr = binding.etTime.text?.toString().orEmpty()
+        val dateFormat = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
+
+        val deadlineDate = if (deadlineStr.isBlank()) {
+            binding.tilDeadline.error = getString(R.string.error_keo_deadline_required)
+            isValid = false
+            null
+        } else {
+            dateFormat.parse(deadlineStr)?.also { date ->
+                if (date.time < System.currentTimeMillis() + 15 * 60 * 1000L) {
+                    binding.tilDeadline.error = getString(R.string.error_keo_deadline_min)
+                    isValid = false
+                }
+            }
+        }
+
+        if (startStr.isBlank()) {
+            binding.tilTime.error = getString(R.string.error_keo_start_required)
+            isValid = false
+        } else {
+            val startDate = dateFormat.parse(startStr)
+            if (startDate != null && deadlineDate != null && !startDate.after(deadlineDate)) {
+                binding.tilTime.error = getString(R.string.error_keo_start_after_deadline)
+                isValid = false
+            }
+        }
+
+        return isValid
+    }
+
     private fun updatePlayers(value: Float) {
         binding.tvPlayersValue.text = getString(R.string.create_players_value, value.toInt())
     }
@@ -128,7 +200,6 @@ class CreateKeoFragment : Fragment(R.layout.fragment_create_keo) {
         binding.tvTrustValue.text = getString(R.string.create_trust_value, value.toInt())
     }
 
-    // Hàm hiển thị hộp thoại chọn ngày và giờ chuẩn của Android
     private fun showDateTimePicker(editText: EditText) {
         val calendar = Calendar.getInstance()
 

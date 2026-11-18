@@ -142,7 +142,7 @@
                 android:stepSize="1"
                 android:value="7"
                 android:valueFrom="2"
-                android:valueTo="22" />
+                android:valueTo="30" />
 
             <LinearLayout
                 android:layout_width="match_parent"
