@@ -133,12 +133,6 @@ class PickLocationFragment : Fragment(R.layout.fragment_pick_location) {
                 }
             }
         }
-        locationPermissionLauncher.launch(
-            arrayOf(
-                Manifest.permission.ACCESS_FINE_LOCATION,
-                Manifest.permission.ACCESS_COARSE_LOCATION
-            )
-        )
     }
 
     private fun applySelectedPlace(place: PlaceResult) {

@@ -51,10 +51,19 @@ class GeocodingRepository {
         val viewbox = "${centerLng - delta},${centerLat + delta},${centerLng + delta},${centerLat - delta}"
 
         return try {
-            val response = api.searchPlaces(
+            var response = api.searchPlaces(
                 query = query,
-                viewbox = viewbox
+                viewbox = viewbox,
+                bounded = 1
             )
+        // Nếu không có kết quả quanh vị trí hiện tại (ví dụ máy ảo đang để GPS ở Mỹ), tìm lại toàn quốc bỏ bounded
+            if (response.isEmpty()) {
+                response = api.searchPlaces(
+                    query = query,
+                    viewbox = viewbox,
+                    bounded = null
+                )
+            }
             if (response.isEmpty()) {
                 throw AppException(R.string.error_address_not_found)
             }

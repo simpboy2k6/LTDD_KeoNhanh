@@ -53,7 +53,9 @@ class ExploreViewModel(
     // Gọi hàm này ở onResume hoặc sau khi xin quyền vị trí thành công
     fun refreshLocation() {
         viewModelScope.launch {
-            _myLocationFlow.value = locationRepository.getLastKnownLocation()
+            val loc = locationRepository.getLastKnownLocation()
+                ?: runCatching { locationRepository.getCurrentLocation() }.getOrNull()
+            _myLocationFlow.value = loc
         }
     }
 
@@ -95,6 +97,7 @@ class ExploreViewModel(
                         val matchSport = if (filter.sport.isBlank()) true else keo.sport.name == filter.sport
                         matchQuery && matchSport
                     }
+                    .sortedBy { it.distanceKm ?: Double.MAX_VALUE }
             }
                 .catch { e ->
                     _keoListState.value = UiState.Error(e.toUiText())

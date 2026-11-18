@@ -29,6 +29,17 @@ class ExploreMapFragment : Fragment(R.layout.fragment_explore_map) {
             locationRepository = container.locationRepository
         )
     }
+    private var hasAskedLocationThisSession = false
+
+    private val locationPermissionLauncher = registerForActivityResult(
+        androidx.activity.result.contract.ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        val granted = permissions[android.Manifest.permission.ACCESS_FINE_LOCATION] == true ||
+                permissions[android.Manifest.permission.ACCESS_COARSE_LOCATION] == true
+        if (granted) {
+            viewModel.refreshLocation()
+        }
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -107,6 +118,21 @@ class ExploreMapFragment : Fragment(R.layout.fragment_explore_map) {
         collectWhenStarted(viewModel.filterFlow) { filter ->
             binding.header.updateRadius(filter.radiusKm.toInt())
         }
+        val container = (requireActivity().application as com.keonhanh.app.KeoNhanhApp).container
+        if (!container.locationRepository.hasPermission() && !hasAskedLocationThisSession) {
+            hasAskedLocationThisSession = true
+            locationPermissionLauncher.launch(
+                arrayOf(
+                    android.Manifest.permission.ACCESS_FINE_LOCATION,
+                    android.Manifest.permission.ACCESS_COARSE_LOCATION
+                )
+            )
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        viewModel.refreshLocation()
     }
 
     override fun onDestroyView() {

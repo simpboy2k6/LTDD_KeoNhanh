@@ -46,6 +46,7 @@ class ExploreListFragment : Fragment(R.layout.fragment_explore_list) {
             viewModel.refreshLocation()
         }
     }
+    private var hasAskedLocationThisSession = false
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -135,12 +136,16 @@ class ExploreListFragment : Fragment(R.layout.fragment_explore_list) {
                 }
             }
         }
-        locationPermissionLauncher.launch(
-            arrayOf(
-                android.Manifest.permission.ACCESS_FINE_LOCATION,
-                android.Manifest.permission.ACCESS_COARSE_LOCATION
+        val container = (requireActivity().application as com.keonhanh.app.KeoNhanhApp).container
+        if (!container.locationRepository.hasPermission() && !hasAskedLocationThisSession) {
+            hasAskedLocationThisSession = true
+            locationPermissionLauncher.launch(
+                arrayOf(
+                    android.Manifest.permission.ACCESS_FINE_LOCATION,
+                    android.Manifest.permission.ACCESS_COARSE_LOCATION
+                )
             )
-        )
+        }
         collectWhenStarted(viewModel.filterFlow) { filter ->
             binding.header.updateRadius(filter.radiusKm.toInt())
         }
