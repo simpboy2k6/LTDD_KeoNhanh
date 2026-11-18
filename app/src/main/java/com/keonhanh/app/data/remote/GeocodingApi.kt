@@ -19,6 +19,8 @@ interface GeocodingApi {
         @Query("format") format: String = "jsonv2",
         @Query("countrycodes") countryCodes: String = "vn",
         @Query("limit") limit: Int = 5,
+        @Query("viewbox") viewbox: String? = null,
+        @Query("bounded") bounded: Int = 1,
         // Bắt buộc có User-Agent riêng theo quy định của Nominatim
         @Header("User-Agent") userAgent: String = "KeoNhanh/1.0 (do an LTDD)"
     ): List<NominatimPlaceDto>

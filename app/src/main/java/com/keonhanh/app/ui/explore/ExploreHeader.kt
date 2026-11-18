@@ -40,3 +40,6 @@ fun ViewExploreHeaderBinding.setup(
         onSportChanged(sport)
     }
 }
+fun ViewExploreHeaderBinding.updateRadius(radiusKm: Int) {
+    chipRadius.text = root.context.getString(R.string.explore_radius_chip, radiusKm)
+}

@@ -93,6 +93,35 @@ class FirestoreRulesEmulatorTest {
                 .commit().await()
         }
     }
+    @Test
+    fun taoKeo_tenNganHoacSoNguoiNhoHon2_biTuChoi() = runBlocking {
+        val ref = b.firestore.collection(FirestorePaths.KEOS).document()
+        val validData = mapOf(
+            KeoFields.HOST_ID to b.uid,
+            KeoFields.TITLE to "Kèo hợp lệ",
+            KeoFields.MEMBER_COUNT to 1,
+            KeoFields.CAPACITY to 4,
+            KeoFields.MIN_TRUST to null,
+            KeoFields.DEADLINE_AT to minutesFromNow(60),
+        )
+        val hostMember = newMemberMap(b.uid, "Binh", MemberRole.HOST, MemberState.JOINED)
+
+        // 1. Tạo kèo với capacity = 1 (< 2) bị từ chối
+        assertDenied("Tạo kèo với 1 người bị từ chối") {
+            b.firestore.batch()
+                .set(ref, validData + (KeoFields.CAPACITY to 1))
+                .set(ref.collection(FirestorePaths.MEMBERS).document(b.uid), hostMember)
+                .commit().await()
+        }
+
+        // 2. Tạo kèo với tên 2 ký tự (< 3) bị từ chối
+        assertDenied("Tạo kèo tên 2 ký tự bị từ chối") {
+            b.firestore.batch()
+                .set(ref, validData + (KeoFields.TITLE to "AB"))
+                .set(ref.collection(FirestorePaths.MEMBERS).document(b.uid), hostMember)
+                .commit().await()
+        }
+    }
 
     // ---------- memberCount và members ----------
 

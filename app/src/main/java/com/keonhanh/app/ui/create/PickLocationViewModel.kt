@@ -28,7 +28,12 @@ class PickLocationViewModel(
         viewModelScope.launch {
             _searchState.value = UiState.Loading
             try {
-                val results = geocodingRepository.searchAddress(query)
+                // Lấy vị trí gần nhất để ưu tiên tìm kiếm quanh khu vực người dùng (Đà Nẵng)
+                val currentLoc = locationRepository.getLastKnownLocation()
+                val results = geocodingRepository.searchAddress(
+                    rawQuery = query,
+                    userLocation = currentLoc
+                )
                 _searchState.value = UiState.Success(results)
             } catch (e: Exception) {
                 _searchState.value = UiState.Error(e.toUiText())

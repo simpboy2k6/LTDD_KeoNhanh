@@ -85,7 +85,7 @@ class PickLocationFragment : Fragment(R.layout.fragment_pick_location) {
             setFragmentResult(
                 REQUEST_KEY,
                 bundleOf(
-                    KEY_PLACE to place.name,
+                    KEY_PLACE to place.name.substringBefore(" · "),
                     KEY_LAT to place.lat,
                     KEY_LNG to place.lng
                 )
@@ -133,6 +133,12 @@ class PickLocationFragment : Fragment(R.layout.fragment_pick_location) {
                 }
             }
         }
+        locationPermissionLauncher.launch(
+            arrayOf(
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            )
+        )
     }
 
     private fun applySelectedPlace(place: PlaceResult) {

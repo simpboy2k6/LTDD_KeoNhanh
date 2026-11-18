@@ -4,26 +4,17 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.os.bundleOf
+import androidx.fragment.app.setFragmentResult
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.keonhanh.app.R
 import com.keonhanh.app.databinding.BottomSheetFilterBinding
-import com.keonhanh.app.ui.common.appViewModels // Bắt buộc import hàm này
 
 /** S11 Bộ lọc (TV2). Layout: res/layout/bottom_sheet_filter.xml */
 class FilterBottomSheet : BottomSheetDialogFragment() {
 
     private var _binding: BottomSheetFilterBinding? = null
     private val binding get() = _binding!!
-
-    // KHỞI TẠO VIEWMODEL DÙNG CHUNG
-    // Dùng appViewModels để lấy đúng instance đang giữ state filterFlow của màn hình danh sách
-    private val viewModel: ExploreViewModel by appViewModels { container ->
-        ExploreViewModel(
-            authRepository = container.authRepository,
-            keoRepository = container.keoRepository,
-            locationRepository = container.locationRepository
-        )
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -37,41 +28,41 @@ class FilterBottomSheet : BottomSheetDialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // 1. Phục hồi trạng thái cũ của bộ lọc từ ViewModel lên giao diện
-        val currentFilter = viewModel.filterFlow.value
-        binding.sliderRadius.value = currentFilter.radiusKm.toFloat()
+        // Nhận lại trạng thái cũ nếu màn hình cha truyền sang qua arguments
+        val initSport = arguments?.getString(KEY_SPORT).orEmpty()
+        val initRadius = arguments?.getFloat(KEY_RADIUS, DEFAULT_RADIUS_KM) ?: DEFAULT_RADIUS_KM
+        val initTime = arguments?.getString(KEY_TIME).orEmpty()
 
-        when (currentFilter.sport) {
+        binding.sliderRadius.value = initRadius
+
+        when (initSport) {
             "SOCCER" -> binding.chipGroupSport.check(R.id.chip_soccer)
             "BADMINTON" -> binding.chipGroupSport.check(R.id.chip_badminton)
             "BOARD_GAME" -> binding.chipGroupSport.check(R.id.chip_board_game)
             else -> binding.chipGroupSport.clearCheck()
         }
 
-        when (currentFilter.timeRange) {
+        when (initTime) {
             "Hôm nay" -> binding.chipGroupTime.check(R.id.chip_today)
             "Ngày mai" -> binding.chipGroupTime.check(R.id.chip_tomorrow)
             "Cuối tuần" -> binding.chipGroupTime.check(R.id.chip_weekend)
             else -> binding.chipGroupTime.clearCheck()
         }
 
-        // 2. Thiết lập hiển thị Slider
         binding.sliderRadius.setLabelFormatter { value -> radiusText(value) }
         binding.tvRadiusValue.text = radiusText(binding.sliderRadius.value)
         binding.sliderRadius.addOnChangeListener { _, value, _ ->
             binding.tvRadiusValue.text = radiusText(value)
         }
 
-        // 3. Xử lý nút Đặt lại
         binding.btnReset.setOnClickListener {
             binding.chipGroupSport.clearCheck()
-            binding.chipGroupTime.clearCheck() // Thêm lệnh clear thời gian
-            binding.sliderRadius.value = DEFAULT_RADIUS_KM.toFloat()
+            binding.chipGroupTime.clearCheck()
+            binding.sliderRadius.value = DEFAULT_RADIUS_KM
         }
 
-        // 4. Xử lý nút Áp dụng
         binding.btnApply.setOnClickListener {
-            val selectedRadius = binding.sliderRadius.value // Giữ nguyên kiểu Float
+            val selectedRadius = binding.sliderRadius.value
 
             val selectedSport = when (binding.chipGroupSport.checkedChipId) {
                 R.id.chip_soccer -> "SOCCER"
@@ -87,15 +78,14 @@ class FilterBottomSheet : BottomSheetDialogFragment() {
                 else -> ""
             }
 
-            // Ghi đè filter cũ và cập nhật
-            viewModel.updateFilter(
-                currentFilter.copy(
-                    sport = selectedSport,
-                    radiusKm = selectedRadius,
-                    timeRange = selectedTime
+            setFragmentResult(
+                REQUEST_KEY,
+                bundleOf(
+                    KEY_SPORT to selectedSport,
+                    KEY_RADIUS to selectedRadius,
+                    KEY_TIME to selectedTime
                 )
             )
-
             dismiss()
         }
     }
@@ -108,6 +98,10 @@ class FilterBottomSheet : BottomSheetDialogFragment() {
     }
 
     companion object {
-        const val DEFAULT_RADIUS_KM = 3 // Khai báo biến default nếu chưa có
+        const val REQUEST_KEY = "filter"
+        const val KEY_SPORT = "sport"
+        const val KEY_RADIUS = "radius"
+        const val KEY_TIME = "time"
+        const val DEFAULT_RADIUS_KM = 3f
     }
 }
