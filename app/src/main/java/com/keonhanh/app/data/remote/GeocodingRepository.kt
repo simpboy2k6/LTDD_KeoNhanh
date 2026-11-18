@@ -60,10 +60,12 @@ class GeocodingRepository {
                 throw AppException(R.string.error_generic)
             }
         } catch (e: SocketTimeoutException) {
+            android.util.Log.e("Geocoding", "Timeout sau 15s", e)
             throw AppException(R.string.error_network)
         } catch (e: IOException) {
-            // Mất mạng
+            android.util.Log.e("Geocoding", "Lỗi mạng chi tiết: ${e.message}", e)
             throw AppException(R.string.error_network)
+
         } catch (e: Exception) {
             throw AppException(R.string.error_generic)
         }
