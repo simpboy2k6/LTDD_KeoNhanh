@@ -22,9 +22,16 @@ import com.keonhanh.app.data.repository.AppException
 import com.keonhanh.app.data.repository.FirestoreChatRepository
 import com.keonhanh.app.data.repository.FirestoreKeoRepository
 import com.keonhanh.app.data.repository.FirestoreMemberRepository
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
 import org.junit.Assert.assertEquals
 import org.junit.Assert.fail
+import org.json.JSONArray
+import org.json.JSONObject
+import java.net.HttpURLConnection
+import java.net.URL
+import java.time.Instant
 import java.util.Date
 import java.util.concurrent.atomic.AtomicLong
 
@@ -85,14 +92,22 @@ class TestUser(val displayName: String, val auth: FirebaseAuth, val firestore: F
         return keoRef.id
     }
 
-    /** Chủ kèo dời hạn chốt về quá khứ để thử trạng thái "Đã chốt" mà không phải chờ. */
+    /**
+     * Dời hạn chốt về quá khứ để thử trạng thái "Đã chốt" mà không phải chờ.
+     * Tuần 4: firestore.rules bắt hạn chốt phải sau bây giờ mỗi khi chủ kèo sửa kèo, nên không sửa bằng
+     * tài khoản chủ kèo được nữa; ghi thẳng vào Emulator với quyền quản trị (bỏ qua luật).
+     */
     suspend fun moveDeadlineToPast(keoId: String) {
-        keoRef(keoId).update(KeoFields.DEADLINE_AT, minutesFromNow(-1)).await()
+        FirebaseEmulator.adminSetTimes(firestore, keoId, mapOf(KeoFields.DEADLINE_AT to minutesFromNow(-1)))
     }
 
     /** Chủ kèo dời giờ hẹn về sát hiện tại để thử trạng thái "Check-in" (giờ hẹn ± 15 phút). */
     suspend fun moveToCheckInWindow(keoId: String) {
-        keoRef(keoId).update(KeoFields.DEADLINE_AT, minutesFromNow(-30), KeoFields.START_AT, minutesFromNow(5)).await()
+        FirebaseEmulator.adminSetTimes(
+            firestore,
+            keoId,
+            mapOf(KeoFields.DEADLINE_AT to minutesFromNow(-30), KeoFields.START_AT to minutesFromNow(5)),
+        )
     }
 
     private companion object {
@@ -109,6 +124,41 @@ object FirebaseEmulator {
 
     /** Người dùng của chính app (FirebaseApp mặc định): màn hình thật trong test giao diện dùng người này. */
     const val APP_USER = "[DEFAULT]"
+
+    /**
+     * Ghi thẳng các trường thời gian của một kèo vào Firestore Emulator, BỎ QUA luật truy cập
+     * (header "Authorization: Bearer owner" chỉ Emulator mới nhận). Dùng để dựng tình huống mà luật
+     * không cho người dùng tự làm, ví dụ hạn chốt đã qua. Không dùng được với project Firebase thật.
+     */
+    suspend fun adminSetTimes(firestore: FirebaseFirestore, keoId: String, times: Map<String, Timestamp>) {
+        withContext(Dispatchers.IO) {
+            val projectId = checkNotNull(firestore.app.options.projectId)
+            val name = "projects/$projectId/databases/(default)/documents/${FirestorePaths.KEOS}/$keoId"
+            val fields = JSONObject()
+            times.forEach { (field, time) ->
+                fields.put(field, JSONObject().put("timestampValue", Instant.ofEpochMilli(time.toDate().time).toString()))
+            }
+            val write = JSONObject()
+                .put("update", JSONObject().put("name", name).put("fields", fields))
+                .put("updateMask", JSONObject().put("fieldPaths", JSONArray(times.keys.toList())))
+                .put("currentDocument", JSONObject().put("exists", true))
+            val body = JSONObject().put("writes", JSONArray().put(write)).toString()
+
+            val url = URL("http://$HOST:$FIRESTORE_PORT/v1/projects/$projectId/databases/(default)/documents:commit")
+            val connection = url.openConnection() as HttpURLConnection
+            try {
+                connection.requestMethod = "POST"
+                connection.doOutput = true
+                connection.setRequestProperty("Content-Type", "application/json")
+                connection.setRequestProperty("Authorization", "Bearer owner")
+                connection.outputStream.use { it.write(body.toByteArray()) }
+                val code = connection.responseCode
+                check(code == 200) { "Firestore Emulator trả về $code: ${connection.errorStream?.bufferedReader()?.readText()}" }
+            } finally {
+                connection.disconnect()
+            }
+        }
+    }
 
     private val users = mutableMapOf<String, TestUser>()
     private val counter = AtomicLong(System.nanoTime())

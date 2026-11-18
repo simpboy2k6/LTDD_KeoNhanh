@@ -1,78 +1,88 @@
-# KèoNhanh – project Android, tuần 2 (layout tĩnh)
+# KèoNhanh – project Android, tuần 4 (xây dựng chức năng)
 
-Ứng dụng ghép kèo thể thao và board game quanh trường. Bản này là **khung app + layout tĩnh** cho 12 màn hình P0 (và S18 để tab Chat mở được), đúng tiêu chí tuần 2: theme thống nhất (màu, font, icon), luồng màn hình bằng Navigation, dữ liệu mẫu, chưa nối Firebase.
+Ứng dụng ghép kèo thể thao và board game quanh trường. Từ tuần 3 app dùng dữ liệu thật trên **Firebase** (Authentication + Cloud Firestore, gói Spark), kiến trúc **MVVM** (Fragment → ViewModel → Repository → Firebase). Tuần 4 nối nốt các màn còn dùng dữ liệu mẫu và thêm đăng ký, tìm kiếm, thông báo, gọi API.
 
-## Mở project
+## Mở và chạy project
 
-1. Android Studio bản mới (Ladybug 2024.2 trở lên) → **File › Open** → chọn thư mục `KeoNhanh`.
-2. Chờ Gradle Sync. Nếu Android Studio đề nghị nâng cấp Android Gradle Plugin thì chọn đồng ý.
-3. Chạy trên emulator hoặc máy thật Android 8.0 (API 26) trở lên.
+1. Android Studio bản mới → **File › Open** → chọn thư mục repo. Chờ Gradle Sync.
+2. Tải `google-services.json` của project Firebase `keo-nhanh` (Firebase Console › Project settings › Android app `com.keonhanh.app`) đặt vào `app/`. File này nằm trong `.gitignore`, không đưa lên GitHub.
+3. Lần đầu dùng project Firebase mới, làm 2 việc trong Firebase Console (xem `docs/HUONG_DAN_TUAN3_MVVM.md` mục 5):
+   - **Firestore › Rules**: dán nội dung `firestore.rules` rồi Publish.
+   - **Firestore › Indexes › Single field**: thêm exemption cho collection group `members`, trường `uid`, bật *Collection group* Ascending. Thiếu index này thì Kèo của tôi, Danh sách chat và thông báo báo lỗi `FAILED_PRECONDITION`.
+4. Chạy trên máy ảo hoặc máy thật Android 8.0 (API 26) trở lên. Máy ảo phải có Google Play (để quét QR bằng Google code scanner).
 
-Cấu hình: Kotlin 2.0, AGP 8.7, compileSdk/targetSdk 35, minSdk 26, ViewBinding, Navigation component, Material 3 (XML Views).
+Cấu hình: Kotlin 2.0, compileSdk/targetSdk 35, minSdk 26, ViewBinding, Navigation component, Material 3 (XML Views). Thư viện tuần 4 khai báo một lần trong `gradle/libs.versions.toml`: Play services Location, Google code scanner, ZXing core, WorkManager, Retrofit + Gson, OkHttp logging, osmdroid.
 
-## Luồng demo (quay video báo cáo tuần)
+## Tài khoản thử
 
-1. Mở app → **S02 Đăng nhập** → bấm Đăng nhập → **S09 Khám phá – bản đồ**.
-2. Chip "3 km" mở **S11 Bộ lọc**; nút "Danh sách" sang **S10** (bấm chip môn để lọc).
-3. Icon quét QR ở thanh tìm kiếm → **S07 Quét mã mời**: chạm khung camera để giả lập quét, hoặc gõ mã `MS8X4P` / `BD7K2Q` / `CL3H9T` / `CT5N2W` → mở **S15** của kèo đó.
-4. Ở S15 của "Ma Sói tối nay" (mình là thành viên): icon QR trên thanh tiêu đề → **S06 Mã mời** (sao chép mã, chia sẻ link).
-5. Tab **Kèo của tôi** → "Đang làm chủ" → "Cầu lông đôi nam nữ": kèo đang trong giờ check-in, có **thẻ check-in theo khoảng cách**. Menu ⋮ → "Đổi trạng thái check-in (demo)" để xem đủ 7 trạng thái; ở trạng thái "đủ gần" bấm **Check-in**.
-6. Nút chat → **S16** (gõ và gửi thử); nút "Tạo kèo" ở Khám phá → **S12** → ô Điểm hẹn → **S13 Chọn điểm hẹn** → Tạo kèo.
-7. Tab **Chat** (S18), **Hồ sơ** (S05, Đăng xuất quay về S02); tab "Đã xong" ở Kèo của tôi là trạng thái rỗng.
-
-## Cấu trúc thư mục — file nào ở đâu
-
-```
-KeoNhanh/
-├── settings.gradle.kts            khai báo module :app và kho thư viện
-├── build.gradle.kts               plugin cấp project
-├── gradle.properties
-├── gradle/libs.versions.toml      MỌI phiên bản thư viện (thêm Firebase, osmdroid... ở đây)
-├── gradle/wrapper/                Gradle 8.9
-├── licenses/BeVietnamPro-OFL.txt  giấy phép font
-└── app/
-    ├── build.gradle.kts           minSdk, viewBinding, dependencies
-    └── src/main/
-        ├── AndroidManifest.xml    1 Activity duy nhất
-        ├── java/com/keonhanh/app/
-        │   ├── MainActivity.kt            khung app: NavHost + bottom nav, xử lý tràn viền
-        │   ├── data/
-        │   │   ├── model/                 Keo, Sport, KeoStatus, Member, Message, UserProfile,
-        │   │   │                          CheckIn (luật 100 m + 7 trạng thái check-in)
-        │   │   └── sample/SampleData.kt   dữ liệu mẫu tuần 2 (tuần 3 thay bằng repository/)
-        │   ├── ui/                        mỗi nhóm màn hình một package
-        │   │   ├── auth/                  S02 LoginFragment
-        │   │   ├── profile/               S05 ProfileFragment
-        │   │   ├── checkin/               S06 InviteQrFragment, S07 ScanQrFragment, CheckInCard (thẻ check-in)
-        │   │   ├── explore/               S09, S10, S11 + ExploreHeader (phần đầu dùng chung)
-        │   │   ├── create/                S12 CreateKeoFragment, S13 PickLocationFragment
-        │   │   ├── lobby/                 S15 LobbyFragment, S16 LobbyChatFragment, MessageAdapter
-        │   │   ├── mykeo/                 S17 MyKeoFragment
-        │   │   ├── chat/                  S18 ChatListFragment, ChatRoomAdapter
-        │   │   └── common/                KeoAdapter, KeoCardBinder (thẻ kèo), MemberAdapter
-        │   └── util/ViewUtils.kt          avatar chữ cái đầu, định dạng km, Snackbar "làm sau"
-        └── res/
-            ├── layout/                    activity_ · fragment_ · item_ · view_ · bottom_sheet_
-            ├── navigation/nav_graph.xml   luồng màn hình (mục 3 tài liệu tuần 2)
-            ├── menu/                      bottom_nav_menu (4 tab), menu_lobby
-            ├── values/                    colors, dimens, type (8 kiểu chữ), themes, styles,
-            │                              strings (chung) + strings_auth / _explore / _lobby
-            ├── color/                     màu theo trạng thái (chip, tab, viền ô nhập)
-            ├── drawable/                  icon ic_*_24 / ic_*_16, nền bg_*, ảnh giữ chỗ img_*
-            ├── drawable-nodpi/            ảnh QR mẫu (PNG)
-            ├── font/                      Be Vietnam Pro 400/500/600/700
-            └── mipmap-anydpi-v26/         icon launcher
-```
-
-Quy ước đặt tên: layout `fragment_<màn>.xml`, `item_<dòng danh sách>.xml`, `view_<khối dùng lại>.xml`; id có tiền tố theo loại (`tv_`, `iv_`, `btn_`, `rv_`, `chip_`, `til_`, `et_`) để ViewBinding sinh tên dễ đọc (`binding.btnLogin`).
-
-## Ai giữ file nào
-
-| Thành viên | File của mình | File dùng chung chỉ người này sửa |
+| Email | Mật khẩu | Dùng cho |
 | --- | --- | --- |
-| TV1 | `ui/auth`, `ui/profile`, `ui/checkin`, `data/model/CheckIn.kt`, `fragment_login/profile/invite_qr/scan_qr.xml`, `view_checkin_card.xml` (nhúng vào S15), `strings_auth.xml` | |
-| TV2 | `ui/explore`, `ui/create`, `fragment_explore_*.xml`, `bottom_sheet_filter.xml`, `fragment_create_keo.xml`, `fragment_pick_location.xml`, `view_explore_header.xml`, `strings_explore.xml`, icon `ic_*` | |
-| TV3 | `ui/lobby`, `ui/mykeo`, `ui/chat`, `fragment_lobby*.xml`, `fragment_my_keo.xml`, `fragment_chat_list.xml`, `strings_lobby.xml` | `colors.xml`, `dimens.xml`, `type.xml`, `themes.xml`, `styles.xml`, `strings.xml`, `nav_graph.xml`, `item_keo.xml`, `item_member.xml`, `view_empty_state.xml`, `MainActivity.kt` |
+| *(Khoa điền)* | | Máy A: chủ kèo |
+| *(Khoa điền)* | | Máy B: người xin vào |
+
+## Chức năng tuần 4 và người làm
+
+| Chức năng | Người làm | File chính |
+| --- | --- | --- |
+| Đăng ký (họ tên thật), đăng nhập, quên mật khẩu, giữ phiên | Minh Khoa | `ui/auth`, `AuthRepository`, `UserRepository` |
+| Hồ sơ: sửa tên, lịch sử; check-in bằng GPS; `LocationRepository` | Minh Khoa | `ui/profile`, `data/repository/LocationRepository.kt` |
+| Khám phá: ô tìm (bỏ dấu), lọc môn, bán kính, thời gian; khoảng cách thật | Huy Hoàng | `ui/explore`, `util/StringUtil.kt` |
+| Tạo kèo có kiểm tra đầu vào; chọn điểm hẹn bằng API Nominatim | Huy Hoàng | `ui/create`, `data/remote/GeocodingApi.kt` |
+| Thông báo: xin vào, được duyệt, tin nhắn mới, nhắc giờ kèo | Phong Hào | `notify/` |
+| Danh sách chat dữ liệu thật | Phong Hào | `ui/chat` |
+| Mã mời QR (ZXing), quét mã (Google code scanner), liên kết `keonhanh://moi/{code}` | Phong Hào | `ui/checkin/InviteLink.kt`, `InviteQrFragment`, `ScanQrFragment`, `MainActivity` |
+
+## Thông báo hoạt động thế nào
+
+Gói Spark không chạy được Cloud Functions nên không có server gửi push. App tự tạo thông báo trên máy:
+
+- **App đang mở trên màn hình**: `InAppNotifier` nghe Firestore và báo ngay. Đang mở đúng phòng chat hoặc phòng chờ đó thì không báo.
+- **App không ở trên màn hình**: `NotifyWorker` (WorkManager) kiểm tra khoảng **15 phút** một lần khi có mạng, nên thông báo nền có thể trễ tới 15 phút.
+- **Nhắc giờ kèo**: `ReminderWorker` báo trước giờ hẹn 30 phút; rời kèo hoặc kèo bị hủy thì lịch nhắc tự hủy.
+- Bấm thông báo → mở thẳng phòng chờ của kèo đó.
+
+Khi thử thông báo nền: **bấm Home rồi chờ**, đừng bấm Stop trong Android Studio (Android coi là buộc dừng, chặn mọi việc chạy ngầm tới khi mở lại app). Máy Xiaomi, Oppo... cần tắt tối ưu pin cho KèoNhanh. Android 13 trở lên: app xin quyền thông báo một lần khi vào màn chính; từ chối thì app vẫn chạy, chỉ không có thông báo.
+
+## Kịch bản demo (2 máy A và B)
+
+Xem đầy đủ ở tài liệu benchmark tuần 4, mục 8. Tóm tắt phần thông báo và mã mời:
+
+1. A tạo kèo có ngưỡng uy tín. B tìm thấy kèo, bấm **Xin vào** → máy A hiện thông báo.
+2. A bấm thông báo → mở phòng chờ → **Duyệt** → máy B hiện thông báo "Bạn đã được duyệt".
+3. B nhắn tin; A đang ở màn khác → nhận thông báo; tab **Chat** của A đưa kèo này lên đầu.
+4. A mở **Mã mời** (icon QR ở phòng chờ); B vào Khám phá › icon quét → quét QR → mở đúng kèo. Không quét được thì gõ mã 6 ký tự.
+
+## Kiểm thử
+
+- Unit test (không cần máy ảo): `gradlew :app:testDebugUnitTest`.
+- Test với Firebase Emulator (Repository, luật truy cập, màn hình): chạy `firebase emulators:start --only auth,firestore --project demo-keonhanh` ở thư mục gốc, rồi `gradlew :app:connectedDebugAndroidTest`. Chi tiết ở `docs/HUONG_DAN_TUAN3_MVVM.md` mục 9.
+
+## Cấu trúc thư mục
+
+```
+app/src/main/java/com/keonhanh/app/
+├── KeoNhanhApp.kt          tạo AppContainer, kênh thông báo, lịch NotifyWorker
+├── MainActivity.kt         Activity duy nhất: NavHost, bottom nav, mở kèo từ thông báo / link mời
+├── di/AppContainer.kt      nơi duy nhất tạo Firebase và các Repository
+├── data/
+│   ├── model/              dữ liệu để hiển thị (Keo, ChatRoom, UserProfile, CheckIn...)
+│   ├── remote/             tên collection và trường, lớp ...Doc, chuyển đổi, dịch lỗi Firebase
+│   ├── repository/         Auth, User, Keo, Member, Chat, Location
+│   └── sample/             dữ liệu mẫu tuần 2 (đang bỏ dần)
+├── notify/                 thông báo: NotificationHelper, InAppNotifier, NotifyWorker, ReminderWorker
+├── ui/                     mỗi tính năng một package, thường gồm Fragment + ViewModel
+│   ├── auth/ profile/ explore/ create/ lobby/ mykeo/ chat/ checkin/
+│   └── common/             UiState, appViewModels, thẻ kèo, adapter dùng chung
+└── util/                   hàm tiện ích giao diện
+firestore.rules             luật truy cập Firestore
+```
+
+Quy ước đặt tên: layout `fragment_<màn>.xml`, `item_<dòng danh sách>.xml`, `view_<khối dùng lại>.xml`; id có tiền tố theo loại (`tv_`, `iv_`, `btn_`, `rv_`, `chip_`, `til_`, `et_`) để ViewBinding sinh tên dễ đọc (`binding.btnLogin`). Chuỗi mới để trong file `strings_<nhóm>.xml` của người làm (ví dụ `strings_notify.xml`) để tránh xung đột khi merge.
+
+## Làm việc nhóm
+
+- Mỗi người một nhánh (`Khoa`, `t4Hoang`, `tuan4/hao`), PR nhỏ theo từng việc, một người khác xem rồi mới merge vào `main`.
+- File dùng chung (`AndroidManifest.xml`, `nav_graph.xml`, `strings.xml`, `AppContainer.kt`, `build.gradle.kts`, `libs.versions.toml`): nhắn nhóm trước khi sửa.
 
 ## Quy tắc layout (kiểm tra trước khi tạo pull request)
 
@@ -83,20 +93,5 @@ grep -rnE '="#[0-9A-Fa-f]{3,8}"' app/src/main/res/layout
 grep -rn 'android:textSize=' app/src/main/res/layout
 grep -rnE 'android:(text|hint)="[^@]' app/src/main/res/layout
 ```
-
-## Thay đổi so với bản đầu (theo góp ý của thầy)
-
-- Mã QR **không dùng để check-in** nữa mà dùng để **mời vào kèo**: S06 là Mã mời (QR cố định + mã 6 ký tự + chia sẻ link), S07 là Quét mã mời (mở từ Khám phá).
-- **Check-in theo khoảng cách** tới điểm hẹn, làm ngay trong S15 bằng thẻ `view_checkin_card.xml`. Luật tạm chốt trong `data/model/CheckIn.kt`: trong 100 m, sai số GPS dưới 50 m, giờ hẹn ± 15 phút.
-- **S13 Chọn điểm hẹn** lên P0 vì tọa độ điểm hẹn quyết định check-in.
-- Người vào bằng mã mời vẫn theo ngưỡng uy tín (kèo có ngưỡng thì vẫn "Xin vào"); thành viên nào cũng mời được.
-
-## Việc của tuần sau (đã ghi chú trong code)
-
-- Thêm Firebase (Auth, Firestore) vào `libs.versions.toml`, đặt `google-services.json` vào `app/` (đã có trong `.gitignore`).
-- `data/sample/SampleData.kt` → `data/repository/` đọc Firestore; Fragment giữ nguyên layout.
-- S09, S13: thay `iv_map` bằng `org.osmdroid.views.MapView`; S13 trả về tọa độ thật.
-- S15: nút chính đổi theo đủ 5 trạng thái kèo; đồng hồ đếm ngược chạy thật.
-- Tuần 4: vị trí bằng FusedLocationProviderClient + `Location.distanceBetween` để chọn trạng thái thẻ check-in; S06 sinh QR bằng ZXing; S07 quét bằng Code Scanner; deep link `keonhanh://moi/{code}`.
 
 Icon: Material Symbols Rounded (Apache 2.0). Font: Be Vietnam Pro (SIL OFL 1.1).

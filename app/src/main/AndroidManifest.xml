@@ -34,10 +34,23 @@
         <activity
             android:name=".MainActivity"
             android:exported="true"
+            android:launchMode="singleTask"
             android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            <!--
+              Tuần 4 (Phong Hào): liên kết mời keonhanh://moi/{code} mở thẳng app rồi vào phòng chờ.
+              singleTask: app đang mở thì dùng lại MainActivity hiện có (onNewIntent), không mở chồng thêm một bản.
+            -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:host="moi"
+                    android:scheme="keonhanh" />
             </intent-filter>
         </activity>
     </application>
