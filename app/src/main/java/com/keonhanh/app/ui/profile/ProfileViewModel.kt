@@ -3,10 +3,12 @@ package com.keonhanh.app.ui.profile
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.keonhanh.app.R
 import com.keonhanh.app.data.model.UserProfile
 import com.keonhanh.app.data.repository.AuthRepository
 import com.keonhanh.app.data.repository.UserRepository
-import com.keonhanh.app.ui.auth.AuthUiState
+import com.keonhanh.app.ui.common.UiText
+import com.keonhanh.app.ui.common.toUiText
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -14,9 +16,9 @@ import kotlinx.coroutines.launch
 
 // 1. Định nghĩa các trạng thái UI
 sealed class ProfileUiState {
-    object Loading : ProfileUiState()
+    data object Loading : ProfileUiState()
     data class Success(val profile: UserProfile) : ProfileUiState()
-    data class Error(val message: String) : ProfileUiState()
+    data class Error(val message: UiText) : ProfileUiState()
 }
 
 class ProfileViewModel(
@@ -27,58 +29,62 @@ class ProfileViewModel(
     private val _uiState = MutableStateFlow<ProfileUiState>(ProfileUiState.Loading)
     val uiState: StateFlow<ProfileUiState> = _uiState.asStateFlow()
 
-    private val _changeName = MutableStateFlow<String?>(null)
-    val changeName: StateFlow<String?> = _changeName.asStateFlow()
-    /*init {
-        fetchCurrentUserProfile()
-    }*/
-    public fun signOut(){
+    private val _changeName = MutableStateFlow<UiText?>(null)
+    val changeName: StateFlow<UiText?> = _changeName.asStateFlow()
+
+    fun signOut() {
         authRepository.signOut()
     }
-    public fun updateUsername(name : String){
-        val currentUser = authRepository.currentUser
 
+    fun updateUsername(name: String) {
+        val currentUser = authRepository.currentUser
         if (currentUser == null) {
-            _uiState.value = ProfileUiState.Error("Người dùng chưa đăng nhập")
+            _changeName.value = UiText.Res(R.string.error_not_signed_in)
             return
         }
-        viewModelScope.launch{
-            val result = userRepository.ChangeUserName(name,currentUser.uid)
 
+        val trimmed = name.trim()
+        if (trimmed.length !in 2..40) {
+            _changeName.value = UiText.Res(R.string.error_name_length)
+            return
+        }
+
+        viewModelScope.launch {
+            val result = userRepository.ChangeUserName(trimmed, currentUser.uid)
             result.onSuccess {
-                _changeName.value = "Đã đổi tên thành công"
-            }.onFailure { e->
-                _changeName.value = e.message ?: "Có lỗi về mạng "
+                _changeName.value = UiText.Res(R.string.profile_name_changed)
+                fetchCurrentUserProfile()
+            }.onFailure { e ->
+                _changeName.value = e.toUiText()
             }
         }
     }
-    public fun fetchCurrentUserProfile() {
-        // Bước 1: Lấy thông tin tài khoản đang đăng nhập
-        val currentUser = authRepository.currentUser
 
+    fun fetchCurrentUserProfile() {
+        val currentUser = authRepository.currentUser
         if (currentUser == null) {
-            _uiState.value = ProfileUiState.Error("Người dùng chưa đăng nhập")
+            _uiState.value = ProfileUiState.Error(UiText.Res(R.string.error_not_signed_in))
             return
         }
 
-        // Bước 2: Dùng uid để kéo dữ liệu từ Firestore
         viewModelScope.launch {
             val result = userRepository.getUserProfile(currentUser.uid)
-
             result.onSuccess { userProfile ->
                 if (userProfile != null) {
                     _uiState.value = ProfileUiState.Success(userProfile)
                 } else {
-                    _uiState.value = ProfileUiState.Error("Không tìm thấy hồ sơ người dùng")
+                    _uiState.value = ProfileUiState.Error(UiText.Res(R.string.err_user_not_found))
                 }
             }.onFailure { e ->
-                _uiState.value = ProfileUiState.Error(e.message ?: "Lỗi kết nối cơ sở dữ liệu")
+                _uiState.value = ProfileUiState.Error(e.toUiText())
             }
         }
     }
-    public fun resetChangeName(){
-        _changeName.value = null;
+
+    fun resetChangeName() {
+        _changeName.value = null
     }
+
     class ProfileViewModelFactory(
         private val authRepository: AuthRepository,
         private val userRepository: UserRepository

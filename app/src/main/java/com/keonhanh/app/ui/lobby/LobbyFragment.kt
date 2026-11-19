@@ -26,8 +26,12 @@ import com.keonhanh.app.ui.common.MemberAdapter
 import com.keonhanh.app.ui.common.UiState
 import com.keonhanh.app.ui.common.appViewModels
 import com.keonhanh.app.ui.common.collectWhenStarted
+import com.keonhanh.app.ui.common.toUiText
 import com.keonhanh.app.util.bindAvatar
 import com.keonhanh.app.util.showComingSoon
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import kotlinx.coroutines.launch
 
 /**
@@ -72,8 +76,10 @@ class LobbyFragment : Fragment(R.layout.fragment_lobby) {
     private var lastUi: LobbyUi? = null
     private var primaryEnabled = false
 
-    /** Thẻ check-in (Minh Khoa): tuần 3 vẫn duyệt 7 trạng thái bằng menu demo, tuần 4 tính từ GPS. */
+    /** Thẻ check-in (Minh Khoa): tính trạng thái từ GPS. */
     private var checkInState: CheckInState? = null
+    private var lastCheckedInTime: String? = null
+    private var lastCheckedInDistanceM: Int? = null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -112,6 +118,12 @@ class LobbyFragment : Fragment(R.layout.fragment_lobby) {
             when (event) {
                 is LobbyEvent.ShowMessage -> showMessage(event.text.resolve(requireContext()))
                 LobbyEvent.Closed -> nav.navigateUp()
+                is LobbyEvent.CheckedIn -> {
+                    val now = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date())
+                    lastCheckedInTime = now
+                    lastCheckedInDistanceM = event.distanceM
+                    showCheckIn(CheckInState.Done(time = now, distanceM = event.distanceM))
+                }
             }
         }
     }
@@ -186,17 +198,18 @@ class LobbyFragment : Fragment(R.layout.fragment_lobby) {
         showMenu(ui)
 
         if (showCheckInCard) {
-            val myMember = keo.members.firstOrNull { it.id == ui.myState?.name || it.checkedIn }
-            if (myMember?.checkedIn == true) {
-                // Đã check-in rồi: hiển thị trạng thái Done
-                showCheckIn(CheckInState.Done(time = keo.time, distanceM = 0))
+            val checkInTime = ui.checkInTime ?: lastCheckedInTime
+            val checkInDist = ui.checkInDistanceM ?: lastCheckedInDistanceM
+            if (checkInTime != null) {
+                // Đã check-in: hiển thị trạng thái Done với giờ check-in và khoảng cách thật
+                showCheckIn(CheckInState.Done(time = checkInTime, distanceM = checkInDist ?: 0))
             } else {
                 // Chưa check-in: nếu chưa đo thì kích hoạt đo GPS
                 if (checkInState == null || checkInState is CheckInState.NoPermission) {
                     measureLocationAndCheckIn()
                 }
             }
-        } else {
+        }else {
             checkInState = null
             binding.btnPrimary.setText(ui.primaryAction.label)
             primaryEnabled = ui.primaryAction.enabled
@@ -224,7 +237,6 @@ class LobbyFragment : Fragment(R.layout.fragment_lobby) {
             isVisible = ui.pendingRequests.isNotEmpty()
             title = getString(R.string.menu_requests, ui.pendingRequests.size)
         }
-        menu.findItem(R.id.action_demo_checkin).isVisible = keo.status == KeoStatus.CHECK_IN && keo.myRole != MyRole.NONE
     }
 
     private fun onPrimaryClick(button: View) {
@@ -317,7 +329,7 @@ class LobbyFragment : Fragment(R.layout.fragment_lobby) {
                     showCheckIn(CheckInState.InRange(distanceM, userLoc.accuracyM))
                 }
             } catch (e: Exception) {
-                showMessage(e.message ?: "Không lấy được vị trí GPS")
+                showMessage(e.toUiText().resolve(requireContext()))
             }
         }
     }

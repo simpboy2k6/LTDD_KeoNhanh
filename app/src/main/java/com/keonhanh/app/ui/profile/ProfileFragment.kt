@@ -86,16 +86,14 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
 
                 // Lấy tên mới và gọi ViewModel lưu lên Firebase
                 val newName = binding.tvName.text.toString().trim()
-                if (newName.isNotEmpty()) {
-                    viewModel.updateUsername(newName)
-                }
+                viewModel.updateUsername(newName)
             }
         }
         viewLifecycleOwner.lifecycleScope.launch{
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED){
                 viewModel.changeName.collect{ message->
                     if(message!=null){
-                        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, message.resolve(requireContext()), Toast.LENGTH_SHORT).show()
                         viewModel.resetChangeName()
                     }
                 }
@@ -124,7 +122,7 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
                         }
                         is ProfileUiState.Error -> {
                             binding.progressBar.visibility = View.GONE
-                            Toast.makeText(context, state.message, Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, state.message.resolve(requireContext()), Toast.LENGTH_SHORT).show()
                         }
                     }
                 }
