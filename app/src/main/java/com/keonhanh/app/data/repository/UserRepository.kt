@@ -7,6 +7,7 @@ import kotlinx.coroutines.tasks.await
 interface UserRepository {
     suspend fun createUserProfile(userProfile: UserProfile): Result<Unit>
     suspend fun getUserProfile(uid: String): Result<UserProfile?>
+    suspend fun ChangeUserName(name:String, uid: String): Result<Unit>
 }
 
 class FirestoreUserRepository(
@@ -26,6 +27,16 @@ class FirestoreUserRepository(
         }
     }
 
+    override suspend fun ChangeUserName(name: String, uid: String): Result<Unit> {
+        return try{
+            firestore.collection("users")
+                .document(uid)
+                .update("name",name).await()
+            Result.success(Unit)
+        }catch(e: Exception){
+            Result.failure(e)
+        }
+    }
     override suspend fun getUserProfile(uid: String): Result<UserProfile?> {
         return try {
             val document = firestore.collection("users").document(uid).get().await()
