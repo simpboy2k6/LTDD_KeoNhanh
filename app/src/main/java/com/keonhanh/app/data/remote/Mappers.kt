@@ -150,7 +150,7 @@ fun KeoDoc.toKeo(
         minTrust = minTrust,
         inviteCode = inviteCode,
         status = effectiveStatus(nowMillis),
-        checkInWindow = formatCheckInWindow(startAt),
+        checkInWindow = formatCheckInWindow(startAt, deadlineAt),
         myRole = myRole,
         memberCount = memberCount,
     )
@@ -178,10 +178,12 @@ fun formatClock(time: Timestamp): String = clockFormat.format(time.toLocal())
 fun formatStartTime(time: Timestamp): String = dateTimeFormat.format(time.toLocal())
 
 /** Khung check-in "16:45 – 17:15" = giờ hẹn ± CheckInRules.WINDOW_MINUTES. */
-fun formatCheckInWindow(startAt: Timestamp): String {
+fun formatCheckInWindow(startAt: Timestamp, deadlineAt: Timestamp? = null): String {
     val start = startAt.toLocal()
     val minutes = CheckInRules.WINDOW_MINUTES.toLong()
-    return "${clockFormat.format(start.minusMinutes(minutes))} – ${clockFormat.format(start.plusMinutes(minutes))}"
+    val rawOpen = start.minusMinutes(minutes)
+    val actualOpen = deadlineAt?.toLocal()?.let { if (it.isAfter(rawOpen)) it else rawOpen } ?: rawOpen
+    return "${clockFormat.format(actualOpen)} – ${clockFormat.format(start.plusMinutes(minutes))}"
 }
 
 /** Đếm ngược tới hạn chốt: "1:58:00" khi còn trên 1 giờ, "24:10" khi dưới 1 giờ, hết giờ thì "00:00". */

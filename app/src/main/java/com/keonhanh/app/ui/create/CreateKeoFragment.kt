@@ -171,7 +171,7 @@ class CreateKeoFragment : Fragment(R.layout.fragment_create_keo) {
             null
         } else {
             dateFormat.parse(deadlineStr)?.also { date ->
-                if (date.time < System.currentTimeMillis() + 15 * 60 * 1000L) {
+                if (date.time < System.currentTimeMillis() + 1 * 60 * 1000L) {
                     binding.tilDeadline.error = getString(R.string.error_keo_deadline_min)
                     isValid = false
                 }

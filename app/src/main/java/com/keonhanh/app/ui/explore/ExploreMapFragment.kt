@@ -90,6 +90,10 @@ class ExploreMapFragment : Fragment(R.layout.fragment_explore_map) {
             onSportChanged = { sport ->
                 val currentFilter = viewModel.filterFlow.value
                 viewModel.updateFilter(currentFilter.copy(sport = sport?.name ?: ""))
+            },
+            onSearchChanged = { query ->
+                val currentFilter = viewModel.filterFlow.value
+                viewModel.updateFilter(currentFilter.copy(query = query))
             }
         )
 

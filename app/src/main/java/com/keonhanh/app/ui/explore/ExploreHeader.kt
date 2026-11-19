@@ -2,6 +2,7 @@ package com.keonhanh.app.ui.explore
 
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
+import androidx.core.widget.doAfterTextChanged
 import com.keonhanh.app.R
 import com.keonhanh.app.data.model.Sport
 import com.keonhanh.app.databinding.ViewExploreHeaderBinding
@@ -20,6 +21,7 @@ fun ViewExploreHeaderBinding.setup(
     onOpenFilter: () -> Unit,
     onScanInvite: () -> Unit,
     onSportChanged: (Sport?) -> Unit = {},
+    onSearchChanged: (String) -> Unit = {},
 ) {
     val ctx = root.context
     chipRadius.text = ctx.getString(R.string.explore_radius_chip, DEFAULT_RADIUS_KM)
@@ -39,7 +41,17 @@ fun ViewExploreHeaderBinding.setup(
         }
         onSportChanged(sport)
     }
+
+    var searchRunnable: Runnable? = null
+    tvSearchHint.doAfterTextChanged { editable ->
+        searchRunnable?.let { tvSearchHint.removeCallbacks(it) }
+        val text = editable?.toString().orEmpty()
+        val runnable = Runnable { onSearchChanged(text) }
+        searchRunnable = runnable
+        tvSearchHint.postDelayed(runnable, 300L)
+    }
 }
+
 fun ViewExploreHeaderBinding.updateRadius(radiusKm: Int) {
     chipRadius.text = root.context.getString(R.string.explore_radius_chip, radiusKm)
 }

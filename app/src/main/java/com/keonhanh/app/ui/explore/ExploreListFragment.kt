@@ -97,22 +97,15 @@ class ExploreListFragment : Fragment(R.layout.fragment_explore_list) {
                 val currentFilter = viewModel.filterFlow.value
                 viewModel.updateFilter(currentFilter.copy(sport = sport?.name ?: ""))
             },
+            onSearchChanged = { query ->
+                val currentFilter = viewModel.filterFlow.value
+                viewModel.updateFilter(currentFilter.copy(query = query))
+            }
         )
         binding.fabCreate.setOnClickListener { nav.navigate(R.id.action_exploreList_to_createKeo) }
 
         // --- PHẦN MỚI: LẮNG NGHE GÕ TÌM KIẾM CÓ ĐỘ TRỄ 300MS ---
-        // Giả sử ID của EditText trong view_explore_header.xml là tv_search_hint
-        binding.header.tvSearchHint.doAfterTextChanged { editable ->
-            val text = editable?.toString() ?: ""
 
-            searchJob?.cancel() // Hủy bộ đếm cũ nếu người dùng đang gõ tiếp
-
-            searchJob = viewLifecycleOwner.lifecycleScope.launch {
-                delay(300) // Đợi 300ms sau khi ngừng gõ
-                val currentFilter = viewModel.filterFlow.value
-                viewModel.updateFilter(currentFilter.copy(query = text))
-            }
-        }
         // ---------------------------------------------------------
 
         collectWhenStarted(viewModel.keoListState) { state ->
