@@ -120,6 +120,7 @@ fun KeoDoc.toKeo(
     myUid: String?,
     hostTrust: Int? = null,
     distanceKm: Double? = null,
+
     nowMillis: Long = System.currentTimeMillis(),
 ): Keo {
     val joined = members
@@ -137,6 +138,8 @@ fun KeoDoc.toKeo(
         title = title,
         sport = sportEnum,
         place = placeName,
+        lat = lat,
+        lng = lng,
         distanceKm = distanceKm ?: 0.0,
         time = formatStartTime(startAt),
         deadlineCountdown = formatCountdown(deadlineAt.toDate().time - nowMillis),

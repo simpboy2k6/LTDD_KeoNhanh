@@ -52,6 +52,8 @@ data class Keo(
     val status: KeoStatus = KeoStatus.OPEN,
     val checkInWindow: String = "",
     val myRole: MyRole = MyRole.NONE,
+    val lat: Double = 0.0,
+    val lng: Double = 0.0,
     /**
      * Số thành viên. Danh sách ở Khám phá và Kèo của tôi không tải từng thành viên (đỡ tốn lượt đọc)
      * nên [members] có thể rỗng; số người lấy từ trường memberCount lưu sẵn trên Firestore.

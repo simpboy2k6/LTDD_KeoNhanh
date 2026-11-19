@@ -5,6 +5,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Transaction
 import com.keonhanh.app.R
 import com.keonhanh.app.data.model.KeoStatus
+import com.keonhanh.app.data.remote.Attendance
 import com.keonhanh.app.data.remote.FirestorePaths
 import com.keonhanh.app.data.remote.KeoDoc
 import com.keonhanh.app.data.remote.KeoFields
@@ -48,6 +49,8 @@ interface MemberRepository {
 
     /** S08 (chủ kèo): từ chối người xin vào. */
     suspend fun reject(keoId: String, uid: String)
+
+    suspend fun checkIn(keoId: String, uid: String, distanceM: Int)
 
     /** S15 "Rời kèo" hoặc "Hủy yêu cầu": chỉ được trước hạn chốt; chủ kèo không rời được (phải hủy kèo). */
     suspend fun leave(keoId: String, uid: String)
@@ -144,7 +147,13 @@ class FirestoreMemberRepository(
         // Người xin vào chưa được tính vào memberCount nên chỉ cần xóa yêu cầu, không cần transaction
         memberRef(keoId, uid).delete().await()
     }
-
+    override suspend fun checkIn(keoId: String, uid: String, distanceM: Int){
+        memberRef(keoId, uid).update(
+            MemberFields.CHECK_IN_AT, FieldValue.serverTimestamp(),
+            MemberFields.CHECK_IN_DISTANCE_M, distanceM,
+            MemberFields.ATTENDANCE, Attendance.PRESENT.name
+        ).await()
+    }
     override suspend fun leave(keoId: String, uid: String) {
         firestore.runTransaction { tx ->
             val keo = tx.readKeo(keoId)
