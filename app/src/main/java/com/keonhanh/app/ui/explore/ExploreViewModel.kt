@@ -26,6 +26,12 @@ data class KeoFilter(
     val timeRange: String = "" // "Hôm nay", "Ngày mai", "Cuối tuần"
 )
 
+data class KeoMapItem(
+    val keo: Keo,
+    val lat: Double,
+    val lng: Double
+)
+
 class ExploreViewModel(
     private val authRepository: AuthRepository,
     private val keoRepository: KeoRepository,
@@ -35,10 +41,12 @@ class ExploreViewModel(
     private val _keoListState = MutableStateFlow<UiState<List<Keo>>>(UiState.Loading)
     val keoListState = _keoListState.asStateFlow()
 
+    private val _keoMapItems = MutableStateFlow<List<KeoMapItem>>(emptyList())
+    val keoMapItems = _keoMapItems.asStateFlow()
+
     private val _filterFlow = MutableStateFlow(KeoFilter())
     val filterFlow = _filterFlow.asStateFlow()
 
-    // Lưu vị trí GPS dưới dạng StateFlow để có thể làm mới khi người dùng cấp quyền
     private val _myLocationFlow = MutableStateFlow<UserLocation?>(null)
 
     init {
@@ -50,7 +58,6 @@ class ExploreViewModel(
         _filterFlow.value = newFilter
     }
 
-    // Gọi hàm này ở onResume hoặc sau khi xin quyền vị trí thành công
     fun refreshLocation() {
         viewModelScope.launch {
             val loc = locationRepository.getLastKnownLocation()
@@ -75,17 +82,18 @@ class ExploreViewModel(
                         val distKm: Double? = if (myLocation != null) {
                             myLocation.distanceTo(doc.lat, doc.lng) / 1000.0
                         } else {
-                            null // Không có vị trí -> truyền null, không gán cứng 1.5
+                            null
                         }
 
-                        // Nếu có GPS thì lọc theo bán kính; không có GPS thì bỏ qua lọc bán kính
                         if (distKm != null && distKm > filter.radiusKm) {
                             return@mapNotNull null
                         }
 
-                        doc.toKeo(members = emptyList(), myUid = myUid, distanceKm = distKm)
+                        val keo = doc.toKeo(members = emptyList(), myUid = myUid, distanceKm = distKm)
+                        KeoMapItem(keo = keo, lat = doc.lat, lng = doc.lng)
                     }
-                    .filter { keo ->
+                    .filter { item ->
+                        val keo = item.keo
                         val matchQuery = if (filter.query.isBlank()) {
                             true
                         } else {
@@ -97,14 +105,15 @@ class ExploreViewModel(
                         val matchSport = if (filter.sport.isBlank()) true else keo.sport.name == filter.sport
                         matchQuery && matchSport
                     }
-                    .sortedBy { it.distanceKm ?: Double.MAX_VALUE }
+                    .sortedBy { it.keo.distanceKm ?: Double.MAX_VALUE }
             }
                 .catch { e ->
+                    _keoMapItems.value = emptyList()
                     _keoListState.value = UiState.Error(e.toUiText())
                 }
-                .collect { filteredKeos ->
-                    // Luôn trả về UiState.Success (kể cả khi rỗng) để UI hiện màn trống "Không có kèo phù hợp"
-                    _keoListState.value = UiState.Success(filteredKeos)
+                .collect { mapItems ->
+                    _keoMapItems.value = mapItems
+                    _keoListState.value = UiState.Success(mapItems.map { it.keo })
                 }
         }
     }

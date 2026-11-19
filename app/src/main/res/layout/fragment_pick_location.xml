@@ -47,13 +47,11 @@
         android:layout_height="0dp"
         android:layout_weight="1">
 
-        <ImageView
-            android:id="@+id/iv_map"
+        <org.osmdroid.views.MapView
+            android:id="@+id/map_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:contentDescription="@string/cd_map_pick"
-            android:scaleType="centerCrop"
-            android:src="@drawable/img_map_placeholder" />
+            android:contentDescription="@string/cd_map_pick" />
 
         <View
             android:layout_width="@dimen/checkin_radius_preview"
