@@ -1,5 +1,6 @@
 package com.keonhanh.app.data.repository
 
+import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
@@ -12,6 +13,7 @@ import com.keonhanh.app.data.remote.toMessageDoc
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.tasks.await
+import java.util.Date
 
 /**
  * Chat phòng chờ: keos/{keoId}/messages/{msgId}. File này của Phong Hào.
@@ -29,6 +31,9 @@ interface ChatRepository {
     suspend fun send(keoId: String, senderId: String, senderName: String, text: String)
 
     suspend fun delete(keoId: String, messageId: String)
+
+    /** Tuần 4: đọc MỘT LẦN các tin gửi sau mốc [sinceMillis], cũ trước mới sau (WorkManager dùng để báo tin mới). */
+    suspend fun getMessagesSince(keoId: String, sinceMillis: Long, limit: Long = 20): List<MessageDoc>
 
     companion object {
         /** Gói Spark giới hạn lượt đọc mỗi ngày: mỗi lần mở chat chỉ tải 100 tin gần nhất. */
@@ -56,6 +61,15 @@ class FirestoreChatRepository(
 
     override fun observeLatestMessage(keoId: String): Flow<MessageDoc?> =
         observeMessages(keoId, limit = 1).map { it.lastOrNull() }
+
+    override suspend fun getMessagesSince(keoId: String, sinceMillis: Long, limit: Long): List<MessageDoc> =
+        // Lọc và sắp trên cùng một trường sentAt nên Firestore dùng index có sẵn, không phải tạo thêm
+        messages(keoId)
+            .whereGreaterThan(MessageFields.SENT_AT, Timestamp(Date(sinceMillis)))
+            .orderBy(MessageFields.SENT_AT)
+            .limit(limit)
+            .get().await()
+            .documents.map { it.toMessageDoc() }
 
     override suspend fun send(keoId: String, senderId: String, senderName: String, text: String) {
         val clean = text.trim()

@@ -15,7 +15,6 @@
     <string name="lobby_cancel">Hủy kèo</string>
     <string name="lobby_checked_in_count">%1$d/%2$d đã check-in</string>
     <string name="menu_invite">Mời bằng mã QR</string>
-    <string name="menu_demo_checkin">Đổi trạng thái check-in (demo)</string>
     <string name="cd_open_chat">Mở chat phòng chờ</string>
 
     <!-- S15, tuần 3: nút chính theo trạng thái kèo và vai trò -->

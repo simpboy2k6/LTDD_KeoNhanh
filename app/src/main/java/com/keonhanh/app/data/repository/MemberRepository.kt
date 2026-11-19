@@ -5,6 +5,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Transaction
 import com.keonhanh.app.R
 import com.keonhanh.app.data.model.KeoStatus
+import com.keonhanh.app.data.remote.Attendance
 import com.keonhanh.app.data.remote.FirestorePaths
 import com.keonhanh.app.data.remote.KeoDoc
 import com.keonhanh.app.data.remote.KeoFields
@@ -49,8 +50,16 @@ interface MemberRepository {
     /** S08 (chủ kèo): từ chối người xin vào. */
     suspend fun reject(keoId: String, uid: String)
 
+    suspend fun checkIn(keoId: String, uid: String, distanceM: Int)
+
     /** S15 "Rời kèo" hoặc "Hủy yêu cầu": chỉ được trước hạn chốt; chủ kèo không rời được (phải hủy kèo). */
     suspend fun leave(keoId: String, uid: String)
+
+    /** Tuần 4: đọc MỘT LẦN mọi thành viên của kèo (WorkManager dùng khi app không mở, không cần nghe liên tục). */
+    suspend fun getMembers(keoId: String): List<MemberDoc>
+
+    /** Tuần 4: đọc MỘT LẦN các kèo mình đang ở (WorkManager dùng). */
+    suspend fun getMyMemberships(uid: String): List<Membership>
 }
 
 class FirestoreMemberRepository(
@@ -63,6 +72,18 @@ class FirestoreMemberRepository(
     override fun observeMembers(keoId: String): Flow<List<MemberDoc>> =
         keoRef(keoId).collection(FirestorePaths.MEMBERS).snapshotFlow()
             .map { snapshot -> snapshot.documents.map { it.toMemberDoc() } }
+
+    override suspend fun getMembers(keoId: String): List<MemberDoc> =
+        keoRef(keoId).collection(FirestorePaths.MEMBERS).get().await().documents.map { it.toMemberDoc() }
+
+    override suspend fun getMyMemberships(uid: String): List<Membership> =
+        firestore.collectionGroup(FirestorePaths.MEMBERS)
+            .whereEqualTo(MemberFields.UID, uid)
+            .get().await()
+            .documents.mapNotNull { doc ->
+                val keoId = doc.reference.parent.parent?.id ?: return@mapNotNull null
+                Membership(keoId, doc.toMemberDoc())
+            }
 
     override fun observeMyMemberships(uid: String): Flow<List<Membership>> =
         // collectionGroup: tìm trong mọi keos/*/members cùng lúc. Lần chạy đầu Firestore báo thiếu index
@@ -126,7 +147,13 @@ class FirestoreMemberRepository(
         // Người xin vào chưa được tính vào memberCount nên chỉ cần xóa yêu cầu, không cần transaction
         memberRef(keoId, uid).delete().await()
     }
-
+    override suspend fun checkIn(keoId: String, uid: String, distanceM: Int){
+        memberRef(keoId, uid).update(
+            MemberFields.CHECK_IN_AT, FieldValue.serverTimestamp(),
+            MemberFields.CHECK_IN_DISTANCE_M, distanceM,
+            MemberFields.ATTENDANCE, Attendance.PRESENT.name
+        ).await()
+    }
     override suspend fun leave(keoId: String, uid: String) {
         firestore.runTransaction { tx ->
             val keo = tx.readKeo(keoId)

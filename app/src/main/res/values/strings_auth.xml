@@ -25,6 +25,8 @@
     <string name="profile_menu_places">Vị trí quan tâm và thông báo</string>
     <string name="profile_menu_history">Lịch sử kèo</string>
     <string name="profile_logout">Đăng xuất</string>
+    <string name="error_name_length">Tên phải từ 2 đến 40 ký tự</string>
+    <string name="profile_name_changed">Đã đổi tên thành công</string>
 
     <!-- S06 Mã mời vào kèo -->
     <string name="invite_title">Mời vào kèo</string>
@@ -41,7 +43,7 @@
 
     <!-- S07 Quét mã mời -->
     <string name="scan_title">Quét mã mời</string>
-    <string name="scan_camera_placeholder">Vùng camera\n(tuần 4 dùng Code Scanner)\nChạm để giả lập quét</string>
+    <string name="scan_camera_placeholder">Chạm để mở camera quét mã</string>
     <string name="scan_hint">Hướng camera vào mã QR bạn bè gửi</string>
     <string name="scan_or_enter">Hoặc nhập mã mời</string>
     <string name="scan_code_hint">Mã mời (6 ký tự)</string>

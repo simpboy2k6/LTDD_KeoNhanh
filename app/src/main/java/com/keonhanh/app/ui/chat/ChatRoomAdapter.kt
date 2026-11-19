@@ -6,6 +6,7 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.keonhanh.app.R
 import com.keonhanh.app.data.model.ChatRoom
 import com.keonhanh.app.databinding.ItemChatRoomBinding
 
@@ -29,7 +30,12 @@ class ChatRoomAdapter(
             ivSport.backgroundTintList = ContextCompat.getColorStateList(ctx, room.keo.sport.color)
             tvTitle.text = room.keo.title
             tvTime.text = room.time
-            tvLastMessage.text = room.lastMessage
+            tvLastMessage.text = when {
+                room.lastMessage.isEmpty() -> ctx.getString(R.string.lobby_chat_empty)
+                room.isMine -> ctx.getString(R.string.chat_last_line, ctx.getString(R.string.chat_you), room.lastMessage)
+                room.senderName.isNotEmpty() -> ctx.getString(R.string.chat_last_line, room.senderName, room.lastMessage)
+                else -> room.lastMessage
+            }
             root.setOnClickListener { onClick(room) }
         }
     }

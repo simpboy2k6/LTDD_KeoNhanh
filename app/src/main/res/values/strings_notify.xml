@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Chuỗi tuần 4 của Phong Hào: danh sách chat, thông báo, mã mời QR, quét mã, liên kết mời.
+  Để ở file riêng để không đụng strings.xml mà Khoa và Hoàng cùng sửa trong tuần 4.
+-->
+<resources>
+    <!-- S18 Danh sách chat -->
+    <string name="chat_list_empty_title">Chưa có phòng chat</string>
+    <string name="chat_list_empty_message">Vào một kèo để trò chuyện với mọi người trong kèo</string>
+    <string name="chat_list_error_title">Không tải được danh sách chat</string>
+    <string name="chat_you">Bạn</string>
+    <string name="chat_last_line">%1$s: %2$s</string>
+
+    <!-- Kênh thông báo (người dùng thấy trong Cài đặt > Ứng dụng > KèoNhanh > Thông báo) -->
+    <string name="notif_channel_keo">Hoạt động kèo</string>
+    <string name="notif_channel_chat">Tin nhắn</string>
+    <string name="notif_channel_reminder">Nhắc giờ kèo</string>
+
+    <!-- Nội dung thông báo -->
+    <string name="notif_request_title">Có người xin vào kèo</string>
+    <string name="notif_request_text">%1$s xin vào kèo \"%2$s\". Bấm để duyệt.</string>
+    <string name="notif_approved_title">Bạn đã được duyệt</string>
+    <string name="notif_approved_text">Chủ kèo đã duyệt bạn vào kèo \"%1$s\".</string>
+    <string name="notif_messages_more">%1$d tin nhắn mới · %2$s</string>
+    <string name="notif_reminder_title">Sắp đến giờ kèo \"%1$s\"</string>
+    <string name="notif_reminder_text">Bắt đầu lúc %1$s tại %2$s. Tới nơi nhớ check-in.</string>
+
+    <!-- Quét mã, liên kết mời -->
+    <string name="scan_code_invalid">Mã mời gồm 6 chữ cái hoặc chữ số</string>
+    <string name="scan_camera_unavailable">Không mở được trình quét mã, hãy nhập mã tay bên dưới</string>
+    <string name="link_need_login">Đăng nhập rồi mở lại liên kết mời</string>
+</resources>

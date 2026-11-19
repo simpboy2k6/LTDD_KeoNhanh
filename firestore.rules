@@ -54,9 +54,28 @@ service cloud.firestore {
 
     // ---------- users/{uid} (Minh Khoa) ----------
 
+    function isValidUserName(name) {
+      return name is string && name.size() >= 2 && name.size() <= 40;
+    }
+
     match /users/{uid} {
       allow read: if signedIn();
-      allow create, update: if signedIn() && request.auth.uid == uid;
+
+      // Tạo tài khoản: chính chủ, tên 2-40 ký tự, email hợp lệ, chỉ số uy tín ban đầu bằng 0
+      allow create: if signedIn() && request.auth.uid == uid
+        && request.resource.data.uid == uid
+        && isValidUserName(request.resource.data.name)
+        && request.resource.data.email is string
+        && request.resource.data.attended == 0
+        && request.resource.data.committed == 0
+        && request.resource.data.lateCancels == 0
+        && request.resource.data.hosted == 0;
+
+      // Sửa thông tin: chỉ cho phép đổi tên (2-40 ký tự), không được tự sửa điểm uy tín hay uid/email
+      allow update: if signedIn() && request.auth.uid == uid
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name'])
+        && isValidUserName(request.resource.data.name);
+
       allow delete: if false;
     }
 
@@ -142,7 +161,17 @@ service cloud.firestore {
           && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['state', 'joinedAt'])
           && keoAfter(keoId).memberCount == keoBefore(keoId).memberCount + 1;
         // Tuần 4 (Minh Khoa): thêm luật cho thành viên tự ghi checkInAt, checkInDistanceM, attendance của mình.
-
+        allow update: if signedIn() && request.auth.uid == uid
+          && resource.data.state == 'JOINED'
+          && !('checkInAt' in resource.data && resource.data.checkInAt != null)
+          && request.resource.data.diff(resource.data).affectedKeys()
+              .hasOnly(['checkInAt', 'checkInDistanceM', 'attendance'])
+          && request.resource.data.checkInAt == request.time
+          && request.resource.data.checkInDistanceM is int
+          && request.resource.data.checkInDistanceM <= 100
+          && request.resource.data.attendance == 'PRESENT'
+          && request.time >= keoBefore(keoId).startAt - duration.value(15, 'm')
+          && request.time <= keoBefore(keoId).startAt + duration.value(15, 'm');
         // Rời kèo: tự xóa mình trước hạn chốt (đang JOINED thì phải giảm memberCount cùng lúc);
         // chủ kèo xóa được mọi người (từ chối người xin vào, hoặc khi hủy cả kèo)
         allow delete: if (signedIn() && request.auth.uid == uid

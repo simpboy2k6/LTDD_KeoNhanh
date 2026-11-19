@@ -271,4 +271,64 @@ class FirestoreRulesEmulatorTest {
         assertFalse(b.serverGet(b.keoRef(keoId)).exists())
         assertEquals(0, b.keoRef(keoId).collection(FirestorePaths.MEMBERS).get(Source.SERVER).await().size())
     }
+
+    // ---------- check-in (Tuần 4 - Minh Khoa) ----------
+
+    @Test
+    fun thanhVien_checkInDungLuat_duocPhep() = runBlocking {
+        val keoId = host.createKeo()
+        b.members.join(keoId, b.uid, b.displayName)
+        host.moveToCheckInWindow(keoId)
+
+        b.memberRef(keoId, b.uid).update(
+            MemberFields.CHECK_IN_AT, FieldValue.serverTimestamp(),
+            MemberFields.CHECK_IN_DISTANCE_M, 42,
+            MemberFields.ATTENDANCE, "PRESENT"
+        ).await()
+
+        val doc = host.serverGet(b.memberRef(keoId, b.uid))
+        assertEquals("PRESENT", doc.getString(MemberFields.ATTENDANCE))
+        assertEquals(42, doc.getLong(MemberFields.CHECK_IN_DISTANCE_M)?.toInt())
+    }
+
+    @Test
+    fun checkIn_gianLanKhoangCach_hoacCheckInLanHai_biTuChoi() = runBlocking {
+        val keoId = host.createKeo()
+        b.members.join(keoId, b.uid, b.displayName)
+        host.moveToCheckInWindow(keoId)
+
+        // 1. Gian lận khoảng cách > 100m bị chặn
+        assertDenied("Check-in xa hơn 100m bị từ chối") {
+            b.memberRef(keoId, b.uid).update(
+                MemberFields.CHECK_IN_AT, FieldValue.serverTimestamp(),
+                MemberFields.CHECK_IN_DISTANCE_M, 150,
+                MemberFields.ATTENDANCE, "PRESENT"
+            ).await()
+        }
+
+        // 2. Check-in hộ người khác bị chặn
+        assertDenied("Check-in hộ người khác bị từ chối") {
+            c.memberRef(keoId, b.uid).update(
+                MemberFields.CHECK_IN_AT, FieldValue.serverTimestamp(),
+                MemberFields.CHECK_IN_DISTANCE_M, 30,
+                MemberFields.ATTENDANCE, "PRESENT"
+            ).await()
+        }
+
+        // Check-in hợp lệ lần 1
+        b.memberRef(keoId, b.uid).update(
+            MemberFields.CHECK_IN_AT, FieldValue.serverTimestamp(),
+            MemberFields.CHECK_IN_DISTANCE_M, 42,
+            MemberFields.ATTENDANCE, "PRESENT"
+        ).await()
+
+        // 3. Check-in lần 2 bị chặn
+        assertDenied("Check-in lần 2 bị từ chối") {
+            b.memberRef(keoId, b.uid).update(
+                MemberFields.CHECK_IN_AT, FieldValue.serverTimestamp(),
+                MemberFields.CHECK_IN_DISTANCE_M, 10,
+                MemberFields.ATTENDANCE, "PRESENT"
+            ).await()
+        }
+    }
 }
