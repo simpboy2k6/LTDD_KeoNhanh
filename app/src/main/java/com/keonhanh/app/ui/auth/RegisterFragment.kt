@@ -49,9 +49,11 @@ class RegisterFragment : Fragment(R.layout.fragment_register) {
 
             // 2. KIỂM TRA TỪNG ĐIỀU KIỆN VÀ BÁO LỖI VÀO TỪNG Ô
             var isValid = true
-
             if (fullName.isEmpty()) {
-                binding.tilFullName.error = "Vui lòng nhập họ và tên" // Hiện chữ đỏ dưới ô Họ tên
+                binding.tilFullName.error = "Vui lòng nhập họ và tên"
+                isValid = false
+            } else if (fullName.length !in 2..40) {
+                binding.tilFullName.error = getString(R.string.error_name_length)
                 isValid = false
             }
 

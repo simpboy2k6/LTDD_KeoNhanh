@@ -89,6 +89,9 @@ sealed interface LobbyEvent {
 
     /** Kèo vừa bị chủ kèo hủy: quay lại màn trước. */
     data object Closed : LobbyEvent
+
+    /** Thành viên check-in thành công: báo cự ly để Fragment hiển thị thẻ Done. */
+    data class CheckedIn(val distanceM: Int) : LobbyEvent
 }
 
 /**
@@ -220,6 +223,7 @@ class LobbyViewModel(
     }
     fun checkIn(distanceM: Int) = runAction(R.string.checkin_success) { uid ->
         memberRepository.checkIn(keoId, uid, distanceM)
+        _events.send(LobbyEvent.CheckedIn(distanceM))
     }
     private fun deadlineProgress(doc: KeoDoc, now: Long): Int {
         val start = doc.createdAt?.toDate()?.time ?: return 0

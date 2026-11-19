@@ -118,6 +118,12 @@ class LobbyFragment : Fragment(R.layout.fragment_lobby) {
             when (event) {
                 is LobbyEvent.ShowMessage -> showMessage(event.text.resolve(requireContext()))
                 LobbyEvent.Closed -> nav.navigateUp()
+                is LobbyEvent.CheckedIn -> {
+                    val now = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date())
+                    lastCheckedInTime = now
+                    lastCheckedInDistanceM = event.distanceM
+                    showCheckIn(CheckInState.Done(time = now, distanceM = event.distanceM))
+                }
             }
         }
     }
@@ -283,11 +289,7 @@ class LobbyFragment : Fragment(R.layout.fragment_lobby) {
     private fun onCheckInClick(button: View, state: CheckInState) {
         when (state) {
             is CheckInState.InRange -> {
-                val now = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date())
-                lastCheckedInTime = now
-                lastCheckedInDistanceM = state.distanceM
                 viewModel.checkIn(state.distanceM)
-                showCheckIn(CheckInState.Done(time = now, distanceM = state.distanceM))
             }
 
             CheckInState.NoPermission->{
