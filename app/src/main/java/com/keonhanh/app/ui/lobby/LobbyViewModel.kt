@@ -210,7 +210,9 @@ class LobbyViewModel(
             },
         )
     }
-
+    fun checkIn(distanceM: Int) = runAction(R.string.checkin_success) { uid ->
+        memberRepository.checkIn(keoId, uid, distanceM)
+    }
     private fun deadlineProgress(doc: KeoDoc, now: Long): Int {
         val start = doc.createdAt?.toDate()?.time ?: return 0
         val end = doc.deadlineAt.toDate().time

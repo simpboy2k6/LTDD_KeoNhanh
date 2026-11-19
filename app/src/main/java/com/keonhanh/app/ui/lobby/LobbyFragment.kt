@@ -1,16 +1,20 @@
 package com.keonhanh.app.ui.lobby
 
+import android.Manifest
 import android.os.Bundle
 import android.view.View
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.StringRes
 import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.keonhanh.app.R
+import com.keonhanh.app.data.model.CheckInRules
 import com.keonhanh.app.data.model.CheckInState
 import com.keonhanh.app.data.model.KeoStatus
 import com.keonhanh.app.data.model.Member
@@ -24,6 +28,7 @@ import com.keonhanh.app.ui.common.appViewModels
 import com.keonhanh.app.ui.common.collectWhenStarted
 import com.keonhanh.app.util.bindAvatar
 import com.keonhanh.app.util.showComingSoon
+import kotlinx.coroutines.launch
 
 /**
  * S15 Chi tiết kèo / phòng chờ (TV3). Layout: res/layout/fragment_lobby.xml
@@ -38,7 +43,9 @@ class LobbyFragment : Fragment(R.layout.fragment_lobby) {
 
     private val keoId: String by lazy { requireArguments().getString(ARG_KEO_ID).orEmpty() }
 
-    // ViewModel lấy Repository từ AppContainer (xem ui/common/FragmentExt.kt)
+    private val locationRepository by lazy {
+        (requireActivity().application as com.keonhanh.app.KeoNhanhApp).container.locationRepository
+    }
     private val viewModel by appViewModels { container ->
         LobbyViewModel(
             keoId = keoId,
@@ -49,15 +56,23 @@ class LobbyFragment : Fragment(R.layout.fragment_lobby) {
             userRepository = container.userRepository,
         )
     }
-
+    private val locationPermissionLauncher = registerForActivityResult(
+        androidx.activity.result.contract.ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        val granted = permissions[android.Manifest.permission.ACCESS_FINE_LOCATION] == true ||
+                permissions[android.Manifest.permission.ACCESS_COARSE_LOCATION] == true
+        if (granted) {
+            measureLocationAndCheckIn()
+        } else {
+            showCheckIn(CheckInState.NoPermission)
+        }
+    }
     private var memberAdapter: MemberAdapter? = null
     private var snackbar: Snackbar? = null
     private var lastUi: LobbyUi? = null
     private var primaryEnabled = false
 
     /** Thẻ check-in (Minh Khoa): tuần 3 vẫn duyệt 7 trạng thái bằng menu demo, tuần 4 tính từ GPS. */
-    private var demoStates: List<CheckInState> = emptyList()
-    private var demoIndex = 0
     private var checkInState: CheckInState? = null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -71,10 +86,7 @@ class LobbyFragment : Fragment(R.layout.fragment_lobby) {
             when (item.itemId) {
                 R.id.action_invite -> nav.navigate(R.id.action_lobby_to_inviteQr, args)
                 R.id.action_requests -> lastUi?.let { showRequests(it.pendingRequests) }
-                R.id.action_demo_checkin -> if (demoStates.isNotEmpty()) {
-                    demoIndex = (demoIndex + 1) % demoStates.size
-                    showCheckIn(demoStates[demoIndex])
-                }
+
             }
             true
         }
@@ -89,7 +101,7 @@ class LobbyFragment : Fragment(R.layout.fragment_lobby) {
         binding.cardChatPreview.setOnClickListener(openChat)
         binding.btnChat.setOnClickListener(openChat)
         binding.btnPrimary.setOnClickListener { onPrimaryClick(it) }
-        binding.checkin.btnCheckinSecondary.setOnClickListener { it.showComingSoon() }
+        binding.checkin.btnCheckinSecondary.setOnClickListener { measureLocationAndCheckIn() }
 
         collectWhenStarted(viewModel.state) { render(it) }
         collectWhenStarted(viewModel.busy) { busy ->
@@ -174,11 +186,16 @@ class LobbyFragment : Fragment(R.layout.fragment_lobby) {
         showMenu(ui)
 
         if (showCheckInCard) {
-            if (demoStates.isEmpty()) {
-                demoStates = SampleData.checkInDemoStates(keo)
-                demoIndex = demoStates.indexOfFirst { it is CheckInState.InRange }.coerceAtLeast(0)
+            val myMember = keo.members.firstOrNull { it.id == ui.myState?.name || it.checkedIn }
+            if (myMember?.checkedIn == true) {
+                // Đã check-in rồi: hiển thị trạng thái Done
+                showCheckIn(CheckInState.Done(time = keo.time, distanceM = 0))
+            } else {
+                // Chưa check-in: nếu chưa đo thì kích hoạt đo GPS
+                if (checkInState == null || checkInState is CheckInState.NoPermission) {
+                    measureLocationAndCheckIn()
+                }
             }
-            showCheckIn(checkInState ?: demoStates[demoIndex])
         } else {
             checkInState = null
             binding.btnPrimary.setText(ui.primaryAction.label)
@@ -260,15 +277,50 @@ class LobbyFragment : Fragment(R.layout.fragment_lobby) {
     private fun onCheckInClick(button: View, state: CheckInState) {
         when (state) {
             is CheckInState.InRange -> {
-                // Tuần 4 (Minh Khoa): ghi checkInAt, checkInDistanceM vào members/{uid} trên Firestore
-                showCheckIn(CheckInState.Done(time = "16:52", distanceM = state.distanceM))
-                showMessage(getString(R.string.checkin_success))
+                viewModel.checkIn(state.distanceM)
             }
-            // Tuần 4: xin quyền ACCESS_FINE_LOCATION
-            else -> button.showComingSoon()
+
+            CheckInState.NoPermission->{
+                locationPermissionLauncher.launch(
+                    arrayOf(
+                        Manifest.permission.ACCESS_FINE_LOCATION,
+                        Manifest.permission.ACCESS_COARSE_LOCATION
+                    )
+                )
+            }
+            else -> measureLocationAndCheckIn()
         }
     }
-
+    private fun measureLocationAndCheckIn() {
+        val ui = lastUi ?: return
+        val keo = ui.keo
+        // 1. Kiểm tra quyền vị trí
+        if (!locationRepository.hasPermission()) {
+            showCheckIn(CheckInState.NoPermission)
+            return
+        }
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                // 2. Lấy tọa độ GPS máy đang đứng
+                val userLoc = locationRepository.getCurrentLocation()
+                // 3. Nếu sai số GPS > 50m thì bắt đo lại
+                if (userLoc.accuracyM > CheckInRules.MAX_ACCURACY_M) {
+                    showCheckIn(CheckInState.PoorAccuracy(userLoc.accuracyM))
+                    return@launch
+                }
+                // 4. Tính khoảng cách (mét) tới sân keo.lat, keo.lng
+                val distanceM = userLoc.distanceTo(keo.lat, keo.lng).toInt()
+                // 5. Nếu xa hơn 100m thì TooFar, còn trong 100m thì InRange
+                if (distanceM > CheckInRules.RADIUS_M) {
+                    showCheckIn(CheckInState.TooFar(distanceM))
+                } else {
+                    showCheckIn(CheckInState.InRange(distanceM, userLoc.accuracyM))
+                }
+            } catch (e: Exception) {
+                showMessage(e.message ?: "Không lấy được vị trí GPS")
+            }
+        }
+    }
     override fun onDestroyView() {
         super.onDestroyView()
         snackbar?.dismiss()
