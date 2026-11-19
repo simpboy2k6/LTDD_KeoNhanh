@@ -11,6 +11,7 @@ import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResult
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
@@ -21,6 +22,13 @@ import com.keonhanh.app.databinding.FragmentPickLocationBinding
 import com.keonhanh.app.ui.common.UiState
 import com.keonhanh.app.ui.common.appViewModels
 import com.keonhanh.app.ui.common.collectWhenStarted
+import kotlinx.coroutines.launch
+import org.osmdroid.events.MapListener
+import org.osmdroid.events.ScrollEvent
+import org.osmdroid.events.ZoomEvent
+import org.osmdroid.tileprovider.tilesource.TileSourceFactory
+import org.osmdroid.util.GeoPoint
+import java.util.Locale
 
 /** S13 Chọn điểm hẹn (TV2). Layout: res/layout/fragment_pick_location.xml */
 class PickLocationFragment : Fragment(R.layout.fragment_pick_location) {
@@ -36,8 +44,8 @@ class PickLocationFragment : Fragment(R.layout.fragment_pick_location) {
     }
 
     private var selectedPlace: PlaceResult? = null
+    private var ignoreNextScrollEvent = false
 
-    // Bộ xin quyền vị trí theo đúng lưu ý trong LocationRepository.kt của Minh Khoa
     private val locationPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
@@ -57,19 +65,19 @@ class PickLocationFragment : Fragment(R.layout.fragment_pick_location) {
         binding.toolbar.setNavigationOnClickListener { findNavController().navigateUp() }
         binding.tvRadiusNote.text = getString(R.string.pick_radius_note, CheckInRules.RADIUS_M)
 
+        setupMap()
+
         val placeAdapter = PlaceResultAdapter { place ->
-            applySelectedPlace(place)
+            applySelectedPlace(place, moveCamera = true)
             binding.rvSearchResults.isVisible = false
         }
         binding.rvSearchResults.adapter = placeAdapter
 
-        // Bấm Tìm mới gọi API Nominatim
         binding.btnSearchAddress.setOnClickListener {
             val query = binding.etSearchAddress.text?.toString().orEmpty()
             viewModel.searchAddress(query)
         }
 
-        // Bấm Vị trí của tôi -> xin quyền và lấy GPS
         binding.fabMyLocation.setOnClickListener {
             locationPermissionLauncher.launch(
                 arrayOf(
@@ -79,7 +87,6 @@ class PickLocationFragment : Fragment(R.layout.fragment_pick_location) {
             )
         }
 
-        // Bấm Xác nhận -> trả cả tên, lat, lng về CreateKeoFragment
         binding.btnConfirm.setOnClickListener {
             val place = selectedPlace ?: return@setOnClickListener
             setFragmentResult(
@@ -93,7 +100,6 @@ class PickLocationFragment : Fragment(R.layout.fragment_pick_location) {
             findNavController().navigateUp()
         }
 
-        // Lắng nghe kết quả tìm địa chỉ
         collectWhenStarted(viewModel.searchState) { state ->
             when (state) {
                 is UiState.Loading -> {
@@ -115,7 +121,6 @@ class PickLocationFragment : Fragment(R.layout.fragment_pick_location) {
             }
         }
 
-        // Lắng nghe kết quả GPS "Vị trí của tôi"
         collectWhenStarted(viewModel.myLocationState) { state ->
             when (state) {
                 is UiState.Loading -> {
@@ -124,7 +129,7 @@ class PickLocationFragment : Fragment(R.layout.fragment_pick_location) {
                 is UiState.Success -> {
                     binding.progressBar.isVisible = false
                     state.data?.let { place ->
-                        applySelectedPlace(place)
+                        applySelectedPlace(place, moveCamera = true)
                     }
                 }
                 is UiState.Error -> {
@@ -135,11 +140,65 @@ class PickLocationFragment : Fragment(R.layout.fragment_pick_location) {
         }
     }
 
-    private fun applySelectedPlace(place: PlaceResult) {
+    private fun setupMap() {
+        val map = binding.mapView
+        map.setTileSource(TileSourceFactory.MAPNIK)
+        map.setMultiTouchControls(true)
+        map.controller.setZoom(16.5)
+
+        // Đặt tạm tâm Đà Nẵng trước để tránh map nhảy về (0, 0)
+        ignoreNextScrollEvent = true
+        map.controller.setCenter(GeoPoint(16.0544, 108.2022))
+
+        // Gọi hàm suspend getLastKnownLocation() trong coroutine
+        viewLifecycleOwner.lifecycleScope.launch {
+            val container = (requireActivity().application as com.keonhanh.app.KeoNhanhApp).container
+            val lastLoc = container.locationRepository.getLastKnownLocation()
+            if (lastLoc != null && _binding != null) {
+                ignoreNextScrollEvent = true
+                map.controller.setCenter(GeoPoint(lastLoc.lat, lastLoc.lng))
+            }
+        }
+
+        map.addMapListener(object : MapListener {
+            override fun onScroll(event: ScrollEvent?): Boolean {
+                if (ignoreNextScrollEvent) {
+                    ignoreNextScrollEvent = false
+                    return false
+                }
+                val center = map.mapCenter
+                val picked = PlaceResult(
+                    name = String.format(Locale.US, "Điểm đã chọn (%.5f, %.5f)", center.latitude, center.longitude),
+                    lat = center.latitude,
+                    lng = center.longitude
+                )
+                applySelectedPlace(picked, moveCamera = false)
+                return true
+            }
+
+            override fun onZoom(event: ZoomEvent?): Boolean = false
+        })
+    }
+
+    private fun applySelectedPlace(place: PlaceResult, moveCamera: Boolean = false) {
         selectedPlace = place
         binding.tvPlace.text = place.name
-        binding.tvCoords.text = String.format("%.5f, %.5f", place.lat, place.lng)
+        binding.tvCoords.text = String.format(Locale.US, "%.5f, %.5f", place.lat, place.lng)
         binding.btnConfirm.isEnabled = true
+        if (moveCamera) {
+            ignoreNextScrollEvent = true
+            binding.mapView.controller.animateTo(GeoPoint(place.lat, place.lng))
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        binding.mapView.onResume()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        binding.mapView.onPause()
     }
 
     override fun onDestroyView() {
@@ -155,7 +214,6 @@ class PickLocationFragment : Fragment(R.layout.fragment_pick_location) {
     }
 }
 
-// Adapter gọn nhẹ hiển thị danh sách kết quả tìm kiếm
 private class PlaceResultAdapter(
     private val onClick: (PlaceResult) -> Unit
 ) : RecyclerView.Adapter<PlaceResultAdapter.VH>() {
