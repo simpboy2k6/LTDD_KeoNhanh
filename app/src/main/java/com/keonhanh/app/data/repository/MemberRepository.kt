@@ -51,6 +51,12 @@ interface MemberRepository {
 
     /** S15 "Rời kèo" hoặc "Hủy yêu cầu": chỉ được trước hạn chốt; chủ kèo không rời được (phải hủy kèo). */
     suspend fun leave(keoId: String, uid: String)
+
+    /** Tuần 4: đọc MỘT LẦN mọi thành viên của kèo (WorkManager dùng khi app không mở, không cần nghe liên tục). */
+    suspend fun getMembers(keoId: String): List<MemberDoc>
+
+    /** Tuần 4: đọc MỘT LẦN các kèo mình đang ở (WorkManager dùng). */
+    suspend fun getMyMemberships(uid: String): List<Membership>
 }
 
 class FirestoreMemberRepository(
@@ -63,6 +69,18 @@ class FirestoreMemberRepository(
     override fun observeMembers(keoId: String): Flow<List<MemberDoc>> =
         keoRef(keoId).collection(FirestorePaths.MEMBERS).snapshotFlow()
             .map { snapshot -> snapshot.documents.map { it.toMemberDoc() } }
+
+    override suspend fun getMembers(keoId: String): List<MemberDoc> =
+        keoRef(keoId).collection(FirestorePaths.MEMBERS).get().await().documents.map { it.toMemberDoc() }
+
+    override suspend fun getMyMemberships(uid: String): List<Membership> =
+        firestore.collectionGroup(FirestorePaths.MEMBERS)
+            .whereEqualTo(MemberFields.UID, uid)
+            .get().await()
+            .documents.mapNotNull { doc ->
+                val keoId = doc.reference.parent.parent?.id ?: return@mapNotNull null
+                Membership(keoId, doc.toMemberDoc())
+            }
 
     override fun observeMyMemberships(uid: String): Flow<List<Membership>> =
         // collectionGroup: tìm trong mọi keos/*/members cùng lúc. Lần chạy đầu Firestore báo thiếu index
