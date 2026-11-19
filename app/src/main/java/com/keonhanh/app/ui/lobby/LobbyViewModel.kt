@@ -13,6 +13,7 @@ import com.keonhanh.app.data.remote.KeoDoc
 import com.keonhanh.app.data.remote.MemberDoc
 import com.keonhanh.app.data.remote.MemberState
 import com.keonhanh.app.data.remote.MessageDoc
+import com.keonhanh.app.data.remote.formatClock
 import com.keonhanh.app.data.remote.toKeo
 import com.keonhanh.app.data.remote.toMessage
 import com.keonhanh.app.data.repository.AuthRepository
@@ -76,6 +77,10 @@ data class LobbyUi(
     val canOpenChat: Boolean,
     /** Người đang xin vào; chỉ chủ kèo thấy. */
     val pendingRequests: List<Member>,
+    /** Giờ check-in thực tế của mình (ví dụ "16:52"); null nếu chưa check-in. */
+    val checkInTime: String? = null,
+    /** Khoảng cách tới điểm hẹn lúc mình check-in (mét); null nếu chưa check-in. */
+    val checkInDistanceM: Int? = null,
 )
 
 /** Việc chỉ xảy ra một lần (hiện Snackbar, đóng màn), khác với state được vẽ lại liên tục. */
@@ -194,7 +199,8 @@ class LobbyViewModel(
 
     private fun buildUi(doc: KeoDoc, members: List<MemberDoc>, trust: Int?, latest: MessageDoc?, now: Long): LobbyUi {
         val keo = doc.toKeo(members, myUid, trust, nowMillis = now)
-        val myState = members.firstOrNull { it.uid == myUid }?.state
+        val myMember = members.firstOrNull { it.uid == myUid }
+        val myState = myMember?.state
         return LobbyUi(
             keo = keo,
             myState = myState,
@@ -208,6 +214,8 @@ class LobbyViewModel(
             } else {
                 emptyList()
             },
+            checkInTime = myMember?.checkInAt?.let { formatClock(it) },
+            checkInDistanceM = myMember?.checkInDistanceM,
         )
     }
     fun checkIn(distanceM: Int) = runAction(R.string.checkin_success) { uid ->
