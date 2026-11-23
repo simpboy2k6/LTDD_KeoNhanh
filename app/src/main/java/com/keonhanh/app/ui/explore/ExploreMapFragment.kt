@@ -1,5 +1,6 @@
 package com.keonhanh.app.ui.explore
 
+import org.osmdroid.views.overlay.CopyrightOverlay
 import android.os.Bundle
 import android.view.View
 import androidx.core.os.bundleOf
@@ -90,7 +91,7 @@ class ExploreMapFragment : Fragment(R.layout.fragment_explore_map) {
             onSportChanged = { sport ->
                 val currentFilter = viewModel.filterFlow.value
                 viewModel.updateFilter(currentFilter.copy(sport = sport?.name ?: ""))
-            }
+            },
         )
 
         binding.fabCreate.setOnClickListener { nav.navigate(R.id.action_exploreMap_to_createKeo) }
@@ -141,6 +142,10 @@ class ExploreMapFragment : Fragment(R.layout.fragment_explore_map) {
         map.setMultiTouchControls(true)
         map.controller.setZoom(14.5)
         centerMapToUserLocation()
+
+        val copyrightOverlay = CopyrightOverlay(requireContext())
+        map.overlays.add(copyrightOverlay)
+
         val locOverlay = org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay(
             org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider(requireContext()),
             map
@@ -170,7 +175,10 @@ class ExploreMapFragment : Fragment(R.layout.fragment_explore_map) {
 
     private fun renderKeoMarkers(items: List<KeoMapItem>) {
         val map = binding.mapView
+        val copyright = map.overlays.filterIsInstance<CopyrightOverlay>().firstOrNull()
+            ?: CopyrightOverlay(requireContext())
         map.overlays.clear()
+        map.overlays.add(copyright)
         myLocationOverlay?.let { map.overlays.add(it) }
 
         items.forEach { item ->
@@ -220,6 +228,7 @@ class ExploreMapFragment : Fragment(R.layout.fragment_explore_map) {
     }
 
     override fun onDestroyView() {
+        binding.mapView.onDetach()
         super.onDestroyView()
         _binding = null
     }

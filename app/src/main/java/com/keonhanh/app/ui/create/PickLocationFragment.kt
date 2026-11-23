@@ -202,6 +202,7 @@ class PickLocationFragment : Fragment(R.layout.fragment_pick_location) {
     }
 
     override fun onDestroyView() {
+        binding.mapView.onDetach()
         super.onDestroyView()
         _binding = null
     }
