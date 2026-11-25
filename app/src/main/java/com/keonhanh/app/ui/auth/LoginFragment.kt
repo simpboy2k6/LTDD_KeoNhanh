@@ -13,6 +13,7 @@ import androidx.navigation.fragment.findNavController
 import com.keonhanh.app.KeoNhanhApp
 import com.keonhanh.app.R
 import com.keonhanh.app.databinding.FragmentLoginBinding
+import com.keonhanh.app.util.hasInternetConnection
 import com.keonhanh.app.util.showComingSoon
 import kotlinx.coroutines.launch
 
@@ -46,7 +47,12 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
             val email = binding.etEmail.text.toString()
             val pass = binding.etPassword.text.toString()
 
-            viewModel.login(email,pass);
+            if (!requireContext().hasInternetConnection()) {
+                Toast.makeText(context, getString(R.string.err_network_request_failed), Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }else{
+                viewModel.login(email,pass);
+            }
 
 
         }
