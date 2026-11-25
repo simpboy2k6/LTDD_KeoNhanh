@@ -1,5 +1,7 @@
 package com.keonhanh.app.ui.create
 
+import kotlinx.coroutines.TimeoutCancellationException
+import kotlinx.coroutines.withTimeout
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.Timestamp
@@ -84,27 +86,33 @@ class CreateKeoViewModel(
                 val user = authRepository.currentUser ?: throw AppException(R.string.error_not_signed_in)
                 val hostId = user.uid
 
-                // Lấy họ tên thật từ hồ sơ users/{uid}
-                // Lấy họ tên thật từ hồ sơ users/{uid}
-                val profile = userRepository.getUserProfile(hostId).getOrNull()
-                val hostName = profile?.name?.takeIf { it.isNotBlank() }
-                    ?: user.displayName?.takeIf { it.isNotBlank() }
-                    ?: user.email?.substringBefore("@")
-                    ?: "Thành viên"
+// Lấy họ tên thật từ hồ sơ users/{uid}
+                val keoId = try {
+                    withTimeout(8_000L) {
+                        val profile = userRepository.getUserProfile(hostId).getOrNull()
+                        val hostName = profile?.name?.takeIf { it.isNotBlank() }
+                            ?: user.displayName?.takeIf { it.isNotBlank() }
+                            ?: user.email?.substringBefore("@")
+                            ?: "Thành viên"
 
-                val draft = KeoDraft(
-                    title = title,
-                    sport = sport,
-                    placeName = placeName,
-                    lat = lat,
-                    lng = lng,
-                    startAt = Timestamp(startDate),
-                    deadlineAt = Timestamp(deadlineDate),
-                    capacity = capacity,
-                    minTrust = minTrust
-                )
+                        val draft = KeoDraft(
+                            title = title,
+                            sport = sport,
+                            placeName = placeName,
+                            lat = lat,
+                            lng = lng,
+                            startAt = Timestamp(startDate),
+                            deadlineAt = Timestamp(deadlineDate),
+                            capacity = capacity,
+                            minTrust = minTrust
+                        )
 
-                val keoId = keoRepository.createKeo(draft, hostId, hostName)
+                        keoRepository.createKeo(draft, hostId, hostName)
+                    }
+                } catch (e: TimeoutCancellationException) {
+                    throw AppException(R.string.error_network)
+                }
+
                 _createState.value = UiState.Success(keoId)
             } catch (e: Exception) {
                 _createState.value = UiState.Error(e.toUiText())
