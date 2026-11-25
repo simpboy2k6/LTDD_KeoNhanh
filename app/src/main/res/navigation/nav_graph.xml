@@ -92,7 +92,21 @@
         android:id="@+id/profileFragment"
         android:name="com.keonhanh.app.ui.profile.ProfileFragment"
         android:label="S05 Hồ sơ"
-        tools:layout="@layout/fragment_profile" />
+        tools:layout="@layout/fragment_profile">
+        <action
+            android:id="@+id/action_profile_to_keoHistory"
+            app:destination="@id/keoHistoryFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/keoHistoryFragment"
+        android:name="com.keonhanh.app.ui.profile.KeoHistoryFragment"
+        android:label="Lịch sử kèo"
+        tools:layout="@layout/fragment_keo_history">
+        <action
+            android:id="@+id/action_keoHistory_to_lobby"
+            app:destination="@id/lobbyFragment" />
+    </fragment>
 
     <fragment
         android:id="@+id/loginFragment"

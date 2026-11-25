@@ -43,6 +43,17 @@
     <string name="error_name_length">Tên phải từ 2 đến 40 ký tự</string>
     <string name="profile_name_changed">Đã đổi tên thành công</string>
 
+    <!-- Lịch sử kèo -->
+    <string name="history_title">Lịch sử kèo</string>
+    <string name="history_stat_total">Tổng kèo</string>
+    <string name="history_stat_attended">Đã tham gia</string>
+    <string name="history_stat_absent">Vắng mặt</string>
+    <string name="history_status_checked_in">ĐÃ CHECKIN</string>
+    <string name="history_status_absent">VẮNG MẶT</string>
+    <string name="history_empty_title">Chưa có lịch sử kèo</string>
+    <string name="history_empty_message">Các kèo bạn đã tham gia và kết thúc sẽ hiện ở đây</string>
+    <string name="history_error_title">Không tải được lịch sử kèo</string>
+
     <!-- S06 Mã mời vào kèo -->
     <string name="invite_title">Mời vào kèo</string>
     <string name="invite_summary">%1$d/%2$d người · %3$s</string>

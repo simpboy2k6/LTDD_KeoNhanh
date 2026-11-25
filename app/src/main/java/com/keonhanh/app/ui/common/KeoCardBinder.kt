@@ -25,10 +25,11 @@ fun ItemKeoBinding.bind(keo: Keo, showViewButton: Boolean = false) {
         ?.let { ctx.getString(R.string.keo_place_distance, keo.place, formatKm(it)) }
         ?: keo.place
     tvSlots.text = ctx.getString(R.string.keo_slots, keo.memberCount, keo.maxSlots)
-    tvDeadline.text = if (keo.status == KeoStatus.CHECK_IN) {
-        ctx.getString(R.string.keo_checking_in)
-    } else {
-        ctx.getString(R.string.keo_deadline, keo.deadlineCountdown)
+    tvDeadline.text = when (keo.status) {
+        KeoStatus.CHECK_IN -> ctx.getString(R.string.keo_checking_in)
+        KeoStatus.LOCKED -> ctx.getString(R.string.lobby_locked)
+        KeoStatus.ENDED -> ctx.getString(R.string.lobby_ended)
+        KeoStatus.OPEN, KeoStatus.FULL -> ctx.getString(R.string.keo_deadline, keo.deadlineCountdown)
     }
 
     // Tối đa 3 avatar, phần còn lại gộp thành "+n"
