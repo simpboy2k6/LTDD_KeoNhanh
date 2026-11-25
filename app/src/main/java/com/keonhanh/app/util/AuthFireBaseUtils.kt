@@ -6,6 +6,7 @@ import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import com.google.firebase.auth.FirebaseAuthWeakPasswordException
+import com.google.firebase.firestore.FirebaseFirestoreException
 import com.keonhanh.app.R
 
 
@@ -29,6 +30,13 @@ object AuthFireBaseUtils {
                 R.string.err_email_in_use
             }
             is FirebaseNetworkException -> R.string.err_network_request_failed
+            is FirebaseFirestoreException -> {
+                if (e.code == FirebaseFirestoreException.Code.UNAVAILABLE) {
+                    R.string.err_network_request_failed
+                } else {
+                    R.string.err_unknown
+                }
+            }
             is FirebaseAuthException -> {
                 // Xử lý các mã lỗi chung khác dựa vào errorCode
                 R.string.err_unknown

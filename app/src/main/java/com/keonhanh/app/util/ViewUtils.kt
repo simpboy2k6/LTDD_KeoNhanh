@@ -1,5 +1,8 @@
 package com.keonhanh.app.util
 
+import android.content.Context
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import android.view.View
 import android.widget.TextView
 import androidx.core.content.ContextCompat
@@ -57,4 +60,12 @@ fun View.padForKeyboard() {
         view.updatePadding(bottom = (ime - navigationBar).coerceAtLeast(0))
         insets
     }
+}
+
+/** Kiểm tra nhanh thiết bị có đang kết nối Internet (Wi-Fi / 4G / Ethernet) hay không. */
+fun Context.hasInternetConnection(): Boolean {
+    val cm = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+    val network = cm.activeNetwork ?: return false
+    val capabilities = cm.getNetworkCapabilities(network) ?: return false
+    return capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
 }

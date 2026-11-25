@@ -27,6 +27,7 @@
     <string name="error_email_required">Vui lòng nhập email</string>
     <string name="error_email_invalid">Email không đúng định dạng</string>
     <string name="error_password_min_length">Mật khẩu phải từ 6 ký tự trở lên</string>
+    <string name="error_password_whitespace">Mật khẩu không được chứa khoảng trắng</string>
     <string name="error_confirm_password_mismatch">Mật khẩu xác nhận không khớp</string>
 
     <!-- S05 Hồ sơ -->

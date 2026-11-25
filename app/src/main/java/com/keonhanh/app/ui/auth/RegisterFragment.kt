@@ -12,6 +12,7 @@ import androidx.navigation.fragment.findNavController
 import com.keonhanh.app.KeoNhanhApp
 import com.keonhanh.app.R
 import com.keonhanh.app.databinding.FragmentRegisterBinding
+import com.keonhanh.app.util.hasInternetConnection
 import kotlinx.coroutines.launch
 
 
@@ -38,8 +39,8 @@ class RegisterFragment : Fragment(R.layout.fragment_register) {
         binding.btnRegister.setOnClickListener {
             val fullName = binding.etFullName.text.toString().trim()
             val email = binding.etEmail.text.toString().trim()
-            val password = binding.etPassword.text.toString().trim()
-            val confirmPassword = binding.etConfirmPassword.text.toString().trim()
+            val password = binding.etPassword.text.toString()
+            val confirmPassword = binding.etConfirmPassword.text.toString()
 
             // 1. XÓA TẤT CẢ LỖI CŨ (Reset lại trạng thái bình thường)
             binding.tilFullName.error = null
@@ -65,7 +66,10 @@ class RegisterFragment : Fragment(R.layout.fragment_register) {
                 isValid = false
             }
 
-            if (password.length < 6) {
+            if (password.any { it.isWhitespace() }) {
+                binding.tilPassword.error = getString(R.string.error_password_whitespace)
+                isValid = false
+            } else if (password.length < 6) {
                 binding.tilPassword.error = getString(R.string.error_password_min_length) // Hiện chữ đỏ dưới ô Mật khẩu
                 isValid = false
             }
@@ -75,8 +79,12 @@ class RegisterFragment : Fragment(R.layout.fragment_register) {
                 isValid = false
             }
 
-            // 3. NẾU MỌI THỨ ĐỀU ĐÚNG THÌ MỚI GỌI VIEWMODEL ĐỂ ĐĂNG KÝ
+            // 3. NẾU MỌI THỨ ĐỀU ĐÚNG VÀ CÓ MẠNG THÌ MỚI GỌI VIEWMODEL ĐỂ ĐĂNG KÝ
             if (isValid) {
+                if (!requireContext().hasInternetConnection()) {
+                    Toast.makeText(context, getString(R.string.err_network_request_failed), Toast.LENGTH_SHORT).show()
+                    return@setOnClickListener
+                }
                 // Đây chính là phần "truyền tên thật" mà yêu cầu nhắc tới
                 viewModel.register(email, password, fullName)
             }
@@ -97,11 +105,13 @@ class RegisterFragment : Fragment(R.layout.fragment_register) {
                         }
                         is AuthUiState.Success -> {
                             binding.btnRegister.isEnabled = true
+                            binding.btnRegister.setText(R.string.login_register)
                             Toast.makeText(context, getString(R.string.register_success), Toast.LENGTH_SHORT).show()
                             findNavController().navigate(R.id.action_register_to_login)
                         }
                         is AuthUiState.Error -> {
                             binding.btnRegister.isEnabled = true
+                            binding.btnRegister.setText(R.string.login_register)
                             Toast.makeText(context, getString(state.IdMessage), Toast.LENGTH_SHORT).show()
                             viewModel.resetState() // Tránh báo lỗi lại khi xoay màn hình
                         }
