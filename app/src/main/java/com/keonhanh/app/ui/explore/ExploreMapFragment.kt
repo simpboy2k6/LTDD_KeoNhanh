@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.View
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
+import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResultListener
 import androidx.lifecycle.lifecycleScope
@@ -38,6 +39,7 @@ class ExploreMapFragment : Fragment(R.layout.fragment_explore_map) {
     }
     private var hasAskedLocationThisSession = false
     private var hasCenteredMap = false
+    private var searchJob: kotlinx.coroutines.Job? = null
 
     private val locationPermissionLauncher = registerForActivityResult(
         androidx.activity.result.contract.ActivityResultContracts.RequestMultiplePermissions()
@@ -92,7 +94,17 @@ class ExploreMapFragment : Fragment(R.layout.fragment_explore_map) {
                 val currentFilter = viewModel.filterFlow.value
                 viewModel.updateFilter(currentFilter.copy(sport = sport?.name ?: ""))
             },
+
         )
+        binding.header.tvSearchHint.doAfterTextChanged { editable ->
+            val text = editable?.toString().orEmpty()
+            searchJob?.cancel()
+            searchJob = viewLifecycleOwner.lifecycleScope.launch {
+                kotlinx.coroutines.delay(300)
+                val currentFilter = viewModel.filterFlow.value
+                viewModel.updateFilter(currentFilter.copy(query = text))
+            }
+        }
 
         binding.fabCreate.setOnClickListener { nav.navigate(R.id.action_exploreMap_to_createKeo) }
 
