@@ -137,7 +137,7 @@ class ProfileViewModel(
                 committedCount != profile.committed ||
                 hostedCount != profile.hosted
             ) {
-                userRepository.updateStats(uid, attendedCount, committedCount, hostedCount)
+
             }
 
             profile.copy(
