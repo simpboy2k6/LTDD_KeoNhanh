@@ -17,8 +17,8 @@ Cấu hình: Kotlin 2.0, compileSdk/targetSdk 35, minSdk 26, ViewBinding, Naviga
 
 | Email | Mật khẩu | Dùng cho |
 | --- | --- | --- |
-| *(Khoa điền)* | | Máy A: chủ kèo |
-| *(Khoa điền)* | | Máy B: người xin vào |
+| k@gmail.com| 123456| Máy A: chủ kèo |
+| h@gmail.com |123456 | Máy B: người xin vào |
 
 ## Chức năng tuần 4 và người làm
 
