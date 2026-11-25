@@ -8,7 +8,6 @@ interface UserRepository {
     suspend fun createUserProfile(userProfile: UserProfile): Result<Unit>
     suspend fun getUserProfile(uid: String): Result<UserProfile?>
     suspend fun ChangeUserName(name:String, uid: String): Result<Unit>
-    suspend fun updateStats(uid: String, attended: Int, committed: Int, hosted: Int): Result<Unit>
 }
 
 class FirestoreUserRepository(
@@ -35,22 +34,6 @@ class FirestoreUserRepository(
                 .update("name",name).await()
             Result.success(Unit)
         }catch(e: Exception){
-            Result.failure(e)
-        }
-    }
-
-    override suspend fun updateStats(uid: String, attended: Int, committed: Int, hosted: Int): Result<Unit> {
-        return try {
-            firestore.collection("users")
-                .document(uid)
-                .update(
-                    "attended", attended,
-                    "committed", committed,
-                    "hosted", hosted,
-                )
-                .await()
-            Result.success(Unit)
-        } catch (e: Exception) {
             Result.failure(e)
         }
     }
