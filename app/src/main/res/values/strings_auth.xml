@@ -13,6 +13,21 @@
     <string name="login_forgot">Quên mật khẩu?</string>
     <string name="login_no_account">Chưa có tài khoản?</string>
     <string name="login_register">Đăng ký</string>
+    <string name="login_loading">Đang đăng nhập</string>
+    <string name="login_success">Đăng nhập thành công!</string>
+    <string name="login_error_email_first">Vui lòng nhập email vào đây trước</string>
+    <string name="login_reset_email_required">Vui lòng nhập email của bạn</string>
+    <string name="login_reset_sent">Hãy vào email để cài lại mật khẩu</string>
+    <string name="login_reset_error">Lỗi khi gửi email</string>
+
+    <!-- S03 Đăng ký -->
+    <string name="register_button_loading">Đang đăng ký</string>
+    <string name="register_success">Đăng ký thành công! Vui lòng xác nhận email</string>
+    <string name="error_name_required">Vui lòng nhập họ và tên</string>
+    <string name="error_email_required">Vui lòng nhập email</string>
+    <string name="error_email_invalid">Email không đúng định dạng</string>
+    <string name="error_password_min_length">Mật khẩu phải từ 6 ký tự trở lên</string>
+    <string name="error_confirm_password_mismatch">Mật khẩu xác nhận không khớp</string>
 
     <!-- S05 Hồ sơ -->
     <string name="profile_title">Hồ sơ</string>
