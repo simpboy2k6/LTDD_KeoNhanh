@@ -32,7 +32,9 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
         val appContainer = (requireActivity().application as KeoNhanhApp).container
         ProfileViewModel.ProfileViewModelFactory(
             appContainer.authRepository,
-            appContainer.userRepository
+            appContainer.userRepository,
+            appContainer.memberRepository,
+            appContainer.keoRepository
         )
     }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -130,7 +132,9 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
         }
 
         binding.rowPlaces.setOnClickListener { it.showComingSoon() } // S14, P1
-        binding.rowHistory.setOnClickListener { it.showComingSoon() }
+        binding.rowHistory.setOnClickListener {
+            findNavController().navigate(R.id.action_profile_to_keoHistory)
+        }
         binding.btnLogout.setOnClickListener {
             viewModel.signOut()   // thêm hàm này vào ProfileViewModel: authRepository.signOut()
             findNavController().navigate(

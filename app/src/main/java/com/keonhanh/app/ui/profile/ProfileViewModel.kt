@@ -4,14 +4,22 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.keonhanh.app.R
+import com.keonhanh.app.data.model.KeoStatus
 import com.keonhanh.app.data.model.UserProfile
+import com.keonhanh.app.data.remote.Attendance
+import com.keonhanh.app.data.remote.MemberDoc
+import com.keonhanh.app.data.remote.MemberRole
+import com.keonhanh.app.data.remote.MemberState
 import com.keonhanh.app.data.repository.AuthRepository
+import com.keonhanh.app.data.repository.KeoRepository
+import com.keonhanh.app.data.repository.MemberRepository
 import com.keonhanh.app.data.repository.UserRepository
 import com.keonhanh.app.ui.common.UiText
 import com.keonhanh.app.ui.common.toUiText
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 // 1. Định nghĩa các trạng thái UI
@@ -23,7 +31,9 @@ sealed class ProfileUiState {
 
 class ProfileViewModel(
     private val authRepository: AuthRepository,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val memberRepository: MemberRepository,
+    private val keoRepository: KeoRepository,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<ProfileUiState>(ProfileUiState.Loading)
@@ -71,7 +81,9 @@ class ProfileViewModel(
             val result = userRepository.getUserProfile(currentUser.uid)
             result.onSuccess { userProfile ->
                 if (userProfile != null) {
-                    _uiState.value = ProfileUiState.Success(userProfile)
+                    // Tính lại 3 chỉ số (attended, committed, hosted) từ danh sách kèo thật
+                    val updatedProfile = refreshStats(currentUser.uid, userProfile)
+                    _uiState.value = ProfileUiState.Success(updatedProfile)
                 } else {
                     _uiState.value = ProfileUiState.Error(UiText.Res(R.string.err_user_not_found))
                 }
@@ -81,18 +93,77 @@ class ProfileViewModel(
         }
     }
 
+    /**
+     * Đọc các kèo của mình để tính số kèo làm chủ, số kèo đã kết thúc và số lần đã check-in,
+     * rồi đồng bộ ngược lên Firestore users/{uid} nếu số liệu thay đổi.
+     */
+    private suspend fun refreshStats(uid: String, profile: UserProfile): UserProfile {
+        return try {
+            val memberships = memberRepository.observeMyMemberships(uid).first()
+
+            val myMembersMap = HashMap<String, MemberDoc>()
+            val joinedKeoIds = ArrayList<String>()
+            var hostedCount = 0
+
+            for (membership in memberships) {
+                if (membership.member.state == MemberState.JOINED) {
+                    myMembersMap[membership.keoId] = membership.member
+                    joinedKeoIds.add(membership.keoId)
+                    if (membership.member.role == MemberRole.HOST) {
+                        hostedCount++
+                    }
+                }
+            }
+
+            val keoDocs = keoRepository.getKeos(joinedKeoIds)
+            val now = System.currentTimeMillis()
+            var committedCount = 0
+            var attendedCount = 0
+
+            for (doc in keoDocs) {
+                if (doc.effectiveStatus(now) == KeoStatus.ENDED) {
+                    committedCount++
+                    val myRow = myMembersMap[doc.id]
+                    val isCheckedIn = myRow != null &&
+                        (myRow.checkInAt != null || myRow.attendance == Attendance.PRESENT)
+                    if (isCheckedIn) {
+                        attendedCount++
+                    }
+                }
+            }
+
+            // Nếu số liệu khác với trên Firestore thì lưu lại để màn hình khác (S15) cũng đọc được
+            if (attendedCount != profile.attended ||
+                committedCount != profile.committed ||
+                hostedCount != profile.hosted
+            ) {
+                userRepository.updateStats(uid, attendedCount, committedCount, hostedCount)
+            }
+
+            profile.copy(
+                attended = attendedCount,
+                committed = committedCount,
+                hosted = hostedCount,
+            )
+        } catch (_: Exception) {
+            profile
+        }
+    }
+
     fun resetChangeName() {
         _changeName.value = null
     }
 
     class ProfileViewModelFactory(
         private val authRepository: AuthRepository,
-        private val userRepository: UserRepository
+        private val userRepository: UserRepository,
+        private val memberRepository: MemberRepository,
+        private val keoRepository: KeoRepository,
     ) : ViewModelProvider.Factory {
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             if (modelClass.isAssignableFrom(ProfileViewModel::class.java)) {
                 @Suppress("UNCHECKED_CAST")
-                return ProfileViewModel(authRepository, userRepository) as T
+                return ProfileViewModel(authRepository, userRepository, memberRepository, keoRepository) as T
             }
             throw IllegalArgumentException("Unknown ViewModel class")
         }

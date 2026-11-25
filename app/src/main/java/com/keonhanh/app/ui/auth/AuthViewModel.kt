@@ -7,6 +7,7 @@ import com.keonhanh.app.R
 import com.keonhanh.app.data.model.UserProfile
 import com.keonhanh.app.data.repository.AuthRepository
 import com.keonhanh.app.data.repository.UserRepository
+import com.keonhanh.app.ui.common.UiText
 import com.keonhanh.app.util.AuthFireBaseUtils
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -31,8 +32,8 @@ class AuthViewModel(
     private val _uiState = MutableStateFlow<AuthUiState>(AuthUiState.Idle)
     val uiState: StateFlow<AuthUiState> = _uiState.asStateFlow()
 
-    private val _resetPasswordMessage = MutableStateFlow<String?>(null)
-    val resetPasswordMessage: StateFlow<String?> = _resetPasswordMessage.asStateFlow()
+    private val _resetPasswordMessage = MutableStateFlow<UiText?>(null)
+    val resetPasswordMessage: StateFlow<UiText?> = _resetPasswordMessage.asStateFlow()
     // Hàm xử lý Đăng nhập (Cho màn hình S02)
     fun login(email: String, pass: String) {
         if (email.isBlank() || pass.isBlank()) {
@@ -54,15 +55,15 @@ class AuthViewModel(
     }
     fun sendPasswordReset(email: String){
         if (email.isEmpty()) {
-            _resetPasswordMessage.value = "Vui lòng nhập email của bạn"
+            _resetPasswordMessage.value = UiText.Res(R.string.login_reset_email_required)
             return
         }
         viewModelScope.launch {
             val result = authRepository.sendPasswordReset(email)
             result.onSuccess {
-                _resetPasswordMessage.value = "Hãy vào email để cài lại mật khẩu"
+                _resetPasswordMessage.value = UiText.Res(R.string.login_reset_sent)
             }.onFailure { e->
-                _resetPasswordMessage.value = e.message ?: "Lỗi khi gửi email"
+                _resetPasswordMessage.value = e.message?.let { UiText.Raw(it) } ?: UiText.Res(R.string.login_reset_error)
             }
         }
     }

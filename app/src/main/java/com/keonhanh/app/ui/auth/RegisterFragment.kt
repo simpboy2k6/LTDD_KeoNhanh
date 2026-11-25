@@ -50,7 +50,7 @@ class RegisterFragment : Fragment(R.layout.fragment_register) {
             // 2. KIỂM TRA TỪNG ĐIỀU KIỆN VÀ BÁO LỖI VÀO TỪNG Ô
             var isValid = true
             if (fullName.isEmpty()) {
-                binding.tilFullName.error = "Vui lòng nhập họ và tên"
+                binding.tilFullName.error = getString(R.string.error_name_required)
                 isValid = false
             } else if (fullName.length !in 2..40) {
                 binding.tilFullName.error = getString(R.string.error_name_length)
@@ -58,20 +58,20 @@ class RegisterFragment : Fragment(R.layout.fragment_register) {
             }
 
             if (email.isEmpty()) {
-                binding.tilEmail.error = "Vui lòng nhập email" // Hiện chữ đỏ dưới ô Email
+                binding.tilEmail.error = getString(R.string.error_email_required) // Hiện chữ đỏ dưới ô Email
                 isValid = false
             } else if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-                binding.tilEmail.error = "Email không đúng định dạng"
+                binding.tilEmail.error = getString(R.string.error_email_invalid)
                 isValid = false
             }
 
             if (password.length < 6) {
-                binding.tilPassword.error = "Mật khẩu phải từ 6 ký tự trở lên" // Hiện chữ đỏ dưới ô Mật khẩu
+                binding.tilPassword.error = getString(R.string.error_password_min_length) // Hiện chữ đỏ dưới ô Mật khẩu
                 isValid = false
             }
 
             if (confirmPassword != password) {
-                binding.tilConfirmPassword.error = "Mật khẩu xác nhận không khớp" // Hiện chữ đỏ dưới ô Xác nhận
+                binding.tilConfirmPassword.error = getString(R.string.error_confirm_password_mismatch) // Hiện chữ đỏ dưới ô Xác nhận
                 isValid = false
             }
 
@@ -93,11 +93,11 @@ class RegisterFragment : Fragment(R.layout.fragment_register) {
                         is AuthUiState.Idle -> { /* Ẩn loading */ }
                         is AuthUiState.Loading -> {
                             binding.btnRegister.isEnabled = false
-                            binding.btnRegister.text = "Đăng đăng ký"
+                            binding.btnRegister.setText(R.string.register_button_loading)
                         }
                         is AuthUiState.Success -> {
                             binding.btnRegister.isEnabled = true
-                            Toast.makeText(context, "Đăng ký thành công! Vui lòng xác nhận email", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, getString(R.string.register_success), Toast.LENGTH_SHORT).show()
                             findNavController().navigate(R.id.action_register_to_login)
                         }
                         is AuthUiState.Error -> {
