@@ -132,7 +132,7 @@ class ProfileViewModel(
                 }
             }
 
-            // Nếu số liệu khác với trên Firestore thì lưu lại để màn hình khác (S15) cũng đọc được
+
             if (attendedCount != profile.attended ||
                 committedCount != profile.committed ||
                 hostedCount != profile.hosted
