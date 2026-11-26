@@ -147,12 +147,17 @@ class FirestoreMemberRepository(
         // Người xin vào chưa được tính vào memberCount nên chỉ cần xóa yêu cầu, không cần transaction
         memberRef(keoId, uid).delete().await()
     }
-    override suspend fun checkIn(keoId: String, uid: String, distanceM: Int){
-        memberRef(keoId, uid).update(
-            MemberFields.CHECK_IN_AT, FieldValue.serverTimestamp(),
-            MemberFields.CHECK_IN_DISTANCE_M, distanceM,
-            MemberFields.ATTENDANCE, Attendance.PRESENT.name
-        ).await()
+    override suspend fun checkIn(keoId: String, uid: String, distanceM: Int) {
+        // Dùng transaction để bắt buộc có kết nối tới server (mất mạng sẽ báo lỗi ngay thay vì treo chờ offline)
+        firestore.runTransaction { tx ->
+            tx.update(
+                memberRef(keoId, uid),
+                MemberFields.CHECK_IN_AT, FieldValue.serverTimestamp(),
+                MemberFields.CHECK_IN_DISTANCE_M, distanceM,
+                MemberFields.ATTENDANCE, Attendance.PRESENT.name,
+            )
+            null
+        }.await()
     }
     override suspend fun leave(keoId: String, uid: String) {
         firestore.runTransaction { tx ->
