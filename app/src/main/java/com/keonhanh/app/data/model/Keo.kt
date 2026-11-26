@@ -40,7 +40,7 @@ data class Keo(
     val title: String,
     val sport: Sport,
     val place: String,
-    val distanceKm: Double,
+    val distanceKm: Double?,
     val time: String,
     val deadlineCountdown: String,
     val hostName: String,

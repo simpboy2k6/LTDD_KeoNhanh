@@ -144,7 +144,7 @@ fun KeoDoc.toKeo(
         place = placeName,
         lat = lat,
         lng = lng,
-        distanceKm = distanceKm ?: 0.0,
+        distanceKm = distanceKm,
         time = formatStartTime(startAt),
         deadlineCountdown = formatCountdown(deadlineAt.toDate().time - nowMillis),
         hostName = members.firstOrNull { it.role == MemberRole.HOST }?.displayName.orEmpty(),

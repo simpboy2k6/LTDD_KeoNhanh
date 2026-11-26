@@ -51,7 +51,9 @@ class ScreensEmulatorTest {
 
     @Before
     fun signIn() = runBlocking {
-        // Tuần 4: MainActivity xin quyền thông báo (Android 13+) khi vào màn chính; cấp sẵn để hộp thoại không che màn hình test
+        val ui = androidx.test.platform.app.InstrumentationRegistry.getInstrumentation().uiAutomation
+        ui.grantRuntimePermission("com.keonhanh.app", android.Manifest.permission.ACCESS_FINE_LOCATION)
+        ui.grantRuntimePermission("com.keonhanh.app", android.Manifest.permission.ACCESS_COARSE_LOCATION)
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
             androidx.test.platform.app.InstrumentationRegistry.getInstrumentation().uiAutomation.grantRuntimePermission(
                 "com.keonhanh.app",
