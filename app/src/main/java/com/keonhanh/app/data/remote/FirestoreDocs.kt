@@ -41,10 +41,11 @@ data class KeoDoc(
         if (status == KeoStatus.ENDED.name) return KeoStatus.ENDED
         val window = CheckInRules.WINDOW_MINUTES * 60_000L
         val start = startAt.toDate().time
+        val deadline = deadlineAt.toDate().time
         return when {
             nowMillis >= start + window -> KeoStatus.ENDED
-            nowMillis >= start - window -> KeoStatus.CHECK_IN
-            nowMillis >= deadlineAt.toDate().time -> KeoStatus.LOCKED
+            nowMillis >= deadline && nowMillis >= start - window -> KeoStatus.CHECK_IN
+            nowMillis >= deadline -> KeoStatus.LOCKED
             memberCount >= capacity -> KeoStatus.FULL
             else -> KeoStatus.OPEN
         }

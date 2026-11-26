@@ -28,6 +28,7 @@ import com.keonhanh.app.ui.common.appViewModels
 import com.keonhanh.app.ui.common.collectWhenStarted
 import com.keonhanh.app.ui.common.toUiText
 import com.keonhanh.app.util.bindAvatar
+import com.keonhanh.app.util.hasInternetConnection
 import com.keonhanh.app.util.showComingSoon
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -289,6 +290,10 @@ class LobbyFragment : Fragment(R.layout.fragment_lobby) {
     private fun onCheckInClick(button: View, state: CheckInState) {
         when (state) {
             is CheckInState.InRange -> {
+                if (!requireContext().hasInternetConnection()) {
+                    showMessage(getString(R.string.error_network))
+                    return
+                }
                 viewModel.checkIn(state.distanceM)
             }
 
