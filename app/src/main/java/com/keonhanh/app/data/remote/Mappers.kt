@@ -48,7 +48,8 @@ fun DocumentSnapshot.toKeoDoc(): KeoDoc? {
 
 fun DocumentSnapshot.toMemberDoc(): MemberDoc = MemberDoc(
     uid = getString(MemberFields.UID) ?: id,
-    displayName = getString(MemberFields.DISPLAY_NAME).orEmpty(),
+    // BUG-05: kèo tạo trước bản sửa lưu tên chủ kèo ở trường "name"; đọc thêm trường đó để kèo cũ cũng hiện tên
+    displayName = (getString(MemberFields.DISPLAY_NAME) ?: getString(LEGACY_MEMBER_NAME)).orEmpty(),
     role = enumOrDefault(getString(MemberFields.ROLE), MemberRole.MEMBER),
     state = enumOrDefault(getString(MemberFields.STATE), MemberState.JOINED),
     joinedAt = getTimestamp(MemberFields.JOINED_AT, DocumentSnapshot.ServerTimestampBehavior.ESTIMATE),
@@ -65,6 +66,9 @@ fun DocumentSnapshot.toMessageDoc(): MessageDoc = MessageDoc(
     // ESTIMATE: tin vừa gửi hiện giờ ước tính ngay, không phải chờ server trả giờ thật
     sentAt = getTimestamp(MessageFields.SENT_AT, DocumentSnapshot.ServerTimestampBehavior.ESTIMATE),
 )
+
+/** Tên trường cũ của tên chủ kèo (trước khi sửa BUG-05). */
+private const val LEGACY_MEMBER_NAME = "name"
 
 private inline fun <reified E : Enum<E>> enumOrDefault(name: String?, default: E): E =
     enumValues<E>().firstOrNull { it.name == name } ?: default
