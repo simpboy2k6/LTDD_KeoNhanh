@@ -7,6 +7,9 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.keonhanh.app.data.remote.FirestorePaths
 import com.keonhanh.app.data.remote.KeoDoc
 import com.keonhanh.app.data.remote.KeoDraft
+import com.keonhanh.app.data.remote.MemberRole
+import com.keonhanh.app.data.remote.MemberState
+import com.keonhanh.app.data.remote.newMemberMap
 import com.keonhanh.app.data.remote.snapshotFlow
 import com.keonhanh.app.data.remote.toKeoDoc
 import com.keonhanh.app.data.remote.toNewKeoMap
@@ -58,14 +61,9 @@ class FirestoreKeoRepository(
         batch.set(keoRef, draft.toNewKeoMap(hostId, code))
 
         val hostMemberRef = keoRef.collection(FirestorePaths.MEMBERS).document(hostId)
-        val hostMemberMap = mapOf(
-            "uid" to hostId,
-            "name" to hostName,
-            "role" to "HOST",
-            "state" to "JOINED",
-            "joinedAt" to FieldValue.serverTimestamp()
-        )
-        batch.set(hostMemberRef, hostMemberMap)
+        // BUG-05: trước đây ghi tên vào trường "name", nhưng màn Chi tiết kèo đọc "displayName" nên tên chủ kèo trống.
+        // Dùng chung newMemberMap với lúc tham gia kèo để các trường luôn trùng tên.
+        batch.set(hostMemberRef, newMemberMap(hostId, hostName, MemberRole.HOST, MemberState.JOINED))
 
         batch.commit().await()
         return keoRef.id
