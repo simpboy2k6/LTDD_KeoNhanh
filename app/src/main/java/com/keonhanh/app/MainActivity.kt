@@ -92,12 +92,13 @@ class MainActivity : AppCompatActivity() {
             if (destination.id in bottomNavDestinations) askNotificationPermissionOnce()
         }
 
-        // Tuần 2: luôn mở Đăng nhập trước. Tuần 4: mở từ thông báo hoặc link mời khi đã đăng nhập thì vào thẳng kèo.
+        // Chưa đăng nhập -> mở màn Đăng nhập; đã đăng nhập -> giữ ở Khám phá (hoặc mở kèo nếu đi từ thông báo / link mời).
         if (savedInstanceState == null) {
-            val opened = container.firebaseAuth.currentUser != null && openFromIntent(intent)
-            if (!opened) {
+            if (container.firebaseAuth.currentUser == null) {
                 navController.navigate(R.id.action_global_login)
                 if (hasOpenTarget(intent)) Toast.makeText(this, R.string.link_need_login, Toast.LENGTH_LONG).show()
+            } else {
+                openFromIntent(intent)
             }
         }
 
