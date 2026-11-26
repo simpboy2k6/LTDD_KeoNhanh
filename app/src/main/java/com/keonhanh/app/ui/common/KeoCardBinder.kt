@@ -21,8 +21,9 @@ fun ItemKeoBinding.bind(keo: Keo, showViewButton: Boolean = false) {
 
     tvTitle.text = keo.title
     // Chưa đo khoảng cách (Kèo của tôi) thì chỉ hiện tên điểm hẹn, không hiện "0,0 km"
+    val shortPlace = if (keo.place.length > 22) keo.place.take(22) + "…" else keo.place
     tvSubtitle.text = keo.distanceKm
-        ?.let { ctx.getString(R.string.keo_place_distance, keo.place, formatKm(it)) }
+        ?.let { ctx.getString(R.string.keo_place_distance, shortPlace, formatKm(it)) }
         ?: keo.place
     tvSlots.text = ctx.getString(R.string.keo_slots, keo.memberCount, keo.maxSlots)
     tvDeadline.text = when (keo.status) {

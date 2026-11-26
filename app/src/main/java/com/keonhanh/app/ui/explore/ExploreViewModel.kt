@@ -1,5 +1,8 @@
 package com.keonhanh.app.ui.explore
 
+import com.keonhanh.app.R
+import com.keonhanh.app.data.repository.AppException
+import kotlinx.coroutines.delay
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.keonhanh.app.data.model.Keo
@@ -71,6 +74,15 @@ class ExploreViewModel(
             _keoListState.value = UiState.Loading
             val myUid = authRepository.currentUser?.uid ?: ""
 
+            // Nếu sau 8 giây không nhận được dữ liệu từ Firestore (do mất mạng), báo lỗi thay vì treo mãi
+            val timeoutJob = launch {
+                delay(8_000L)
+                if (_keoListState.value is UiState.Loading) {
+                    _keoMapItems.value = emptyList()
+                    _keoListState.value = UiState.Error(AppException(R.string.error_network).toUiText())
+                }
+            }
+
             combine(
                 keoRepository.observeActiveKeos(),
                 _filterFlow,
@@ -108,10 +120,12 @@ class ExploreViewModel(
                     .sortedBy { it.keo.distanceKm ?: Double.MAX_VALUE }
             }
                 .catch { e ->
+                    timeoutJob.cancel()
                     _keoMapItems.value = emptyList()
                     _keoListState.value = UiState.Error(e.toUiText())
                 }
                 .collect { mapItems ->
+                    timeoutJob.cancel()
                     _keoMapItems.value = mapItems
                     _keoListState.value = UiState.Success(mapItems.map { it.keo })
                 }
