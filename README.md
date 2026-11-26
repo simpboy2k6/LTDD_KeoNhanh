@@ -56,6 +56,8 @@ Xem đầy đủ ở tài liệu benchmark tuần 4, mục 8. Tóm tắt phần 
 
 - Unit test (không cần máy ảo): `gradlew :app:testDebugUnitTest`.
 - Test với Firebase Emulator (Repository, luật truy cập, màn hình): chạy `firebase emulators:start --only auth,firestore --project demo-keonhanh` ở thư mục gốc, rồi `gradlew :app:connectedDebugAndroidTest`. Chi tiết ở `docs/HUONG_DAN_TUAN3_MVVM.md` mục 9.
+- Kiểm thử thủ công tuần 5 (test case, danh sách lỗi, tổng hợp số liệu): [docs/tuan5/KiemThu_Tuan5.xlsx](docs/tuan5/KiemThu_Tuan5.xlsx), bản xuất ngày 26/11/2026 từ file Google Sheets *KèoNhanh – Kiểm thử tuần 5* của nhóm.
+- Bản đồ hoặc ô tìm địa chỉ không hiện: kiểm tra mạng có chặn tên miền `openstreetmap.org` không. Nếu có, đặt DNS riêng tư (Private DNS) của máy thành `dns.google`.
 
 ## Cấu trúc thư mục
 
