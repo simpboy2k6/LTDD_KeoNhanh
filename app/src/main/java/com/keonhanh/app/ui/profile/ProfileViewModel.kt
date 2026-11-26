@@ -131,8 +131,6 @@ class ProfileViewModel(
                     }
                 }
             }
-
-
             if (attendedCount != profile.attended ||
                 committedCount != profile.committed ||
                 hostedCount != profile.hosted
