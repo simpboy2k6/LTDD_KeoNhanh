@@ -1,5 +1,6 @@
 package com.keonhanh.app.ui.create
 
+import com.keonhanh.app.util.hasInternetConnection
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.os.Bundle
@@ -93,6 +94,11 @@ class CreateKeoFragment : Fragment(R.layout.fragment_create_keo) {
         binding.btnCreate.setOnClickListener {
             if (!validateInputsOnUi()) return@setOnClickListener
 
+            if (!requireContext().hasInternetConnection()) {
+                Snackbar.make(requireView(), R.string.error_network, Snackbar.LENGTH_LONG).show()
+                return@setOnClickListener
+            }
+
             val selectedSport = when (binding.chipGroupSport.checkedChipId) {
                 R.id.chip_badminton -> Sport.BADMINTON
                 R.id.chip_board_game -> Sport.BOARD_GAME
@@ -171,7 +177,7 @@ class CreateKeoFragment : Fragment(R.layout.fragment_create_keo) {
             null
         } else {
             dateFormat.parse(deadlineStr)?.also { date ->
-                if (date.time < System.currentTimeMillis() + 15 * 60 * 1000L) {
+                if (date.time < System.currentTimeMillis() + 1 * 60 * 1000L) {
                     binding.tilDeadline.error = getString(R.string.error_keo_deadline_min)
                     isValid = false
                 }
