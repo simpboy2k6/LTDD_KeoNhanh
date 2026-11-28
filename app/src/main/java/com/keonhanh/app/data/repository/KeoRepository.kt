@@ -1,5 +1,6 @@
 package com.keonhanh.app.data.repository
 
+import com.google.firebase.firestore.Source
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FieldPath
 import com.google.firebase.firestore.FieldValue
@@ -109,7 +110,10 @@ class FirestoreKeoRepository(
         var code = ""
         while (!isUnique) {
             code = (1..6).map { Random.nextInt(0, charPool.size) }.map(charPool::get).joinToString("")
-            val check = keos.whereEqualTo("inviteCode", code).limit(1).get().await()
+            val check = keos.whereEqualTo("inviteCode", code)
+                .limit(1)
+                .get(Source.SERVER) // Bắt buộc hỏi server: mất mạng sẽ ném lỗi ngay trước khi chạy batch.commit()
+                .await()
             if (check.isEmpty) isUnique = true
         }
         return code

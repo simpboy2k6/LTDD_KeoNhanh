@@ -73,7 +73,7 @@ class CreateKeoViewModel(
                     ?: throw AppException(R.string.error_keo_start_required)
 
                 // Hạn chốt phải cách hiện tại ít nhất 15 phút
-                val minDeadlineMillis = System.currentTimeMillis() + 15 * 60 * 1000L
+                val minDeadlineMillis = System.currentTimeMillis() + 1 * 60 * 1000L
                 if (deadlineDate.time < minDeadlineMillis) {
                     throw AppException(R.string.error_keo_deadline_min)
                 }
